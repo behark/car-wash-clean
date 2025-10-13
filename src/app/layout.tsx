@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import FloatingContactWidget from '../components/FloatingContactWidget'
 import BookingSystem from '../components/BookingSystem'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -54,9 +55,19 @@ export default function RootLayout({
   return (
     <html lang="fi">
       <body className={inter.className}>
-        {children}
-        <FloatingContactWidget />
-        <BookingSystem />
+        <ErrorBoundary level="page" showDetails={process.env.NODE_ENV === 'development'}>
+          <main>
+            <ErrorBoundary level="section">
+              {children}
+            </ErrorBoundary>
+          </main>
+          <ErrorBoundary level="component">
+            <FloatingContactWidget />
+          </ErrorBoundary>
+          <ErrorBoundary level="component">
+            <BookingSystem />
+          </ErrorBoundary>
+        </ErrorBoundary>
       </body>
     </html>
   )
