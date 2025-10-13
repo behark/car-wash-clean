@@ -1,11 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for better performance and memory optimization
+  // Enable experimental features for aggressive memory optimization
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
     optimizeServerReact: true,
     serverMinification: true,
+    workerThreads: false,
+    esmExternals: true,
   },
+
+  // Server external packages (moved from experimental)
+  serverExternalPackages: ['@sanity/client', '@sanity/image-url'],
 
   // Turbo configuration
   turbopack: {
@@ -17,7 +22,7 @@ const nextConfig = {
     },
   },
 
-  // Image optimization
+  // Memory-optimized image configuration
   images: {
     remotePatterns: [
       {
@@ -33,11 +38,13 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
-    dangerouslyAllowSVG: true,
+    formats: ['image/webp'],
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [32, 64, 128, 256],
+    minimumCacheTTL: 300,
+    dangerouslyAllowSVG: false,
+    unoptimized: false,
+    loader: 'default',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
@@ -53,24 +60,39 @@ const nextConfig = {
   // Output and bundle optimizations for memory efficiency
   output: 'standalone',
   generateEtags: false,
+  trailingSlash: false,
+  cleanDistDir: true,
 
-  // Webpack optimizations for memory
+  // Aggressive webpack optimizations for ultra-low memory
   webpack: (config, { dev, isServer }) => {
-    // Memory optimization
+    // Aggressive memory optimization
     config.optimization = {
       ...config.optimization,
       minimize: !dev,
       sideEffects: false,
+      removeAvailableModules: true,
+      removeEmptyChunks: true,
+      mergeDuplicateChunks: true,
       splitChunks: {
         chunks: 'all',
+        minSize: 10000,
+        maxSize: 50000,
         cacheGroups: {
           default: false,
           vendors: false,
+          sanity: {
+            name: 'sanity',
+            chunks: 'all',
+            test: /@sanity/,
+            priority: 30,
+            enforce: true
+          },
           vendor: {
             name: 'vendor',
             chunks: 'all',
             test: /node_modules/,
-            priority: 20
+            priority: 20,
+            maxSize: 40000
           },
           common: {
             name: 'common',
@@ -78,16 +100,27 @@ const nextConfig = {
             chunks: 'all',
             priority: 10,
             reuseExistingChunk: true,
-            enforce: true
+            enforce: true,
+            maxSize: 30000
           }
         }
       }
     };
 
-    // Reduce memory usage in build
-    if (!dev && !isServer) {
+    // Memory-conscious build optimizations
+    if (!dev) {
       config.optimization.usedExports = true;
       config.optimization.providedExports = true;
+      config.optimization.concatenateModules = true;
+
+      // Reduce memory pressure during build
+      config.parallelism = 1;
+      config.cache = false;
+    }
+
+    // Server-side memory optimizations
+    if (isServer) {
+      config.externals = [...(config.externals || []), '@sanity/client'];
     }
 
     return config;

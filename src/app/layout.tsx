@@ -4,8 +4,9 @@ import './globals.css'
 import FloatingContactWidget from '../components/FloatingContactWidget'
 import BookingSystem from '../components/BookingSystem'
 import ErrorBoundary from '../components/ErrorBoundary'
+import MemoryMonitor from '../components/MemoryMonitor'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true })
 
 export const metadata: Metadata = {
   title: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua Helsingissä',
@@ -55,7 +56,8 @@ export default function RootLayout({
   return (
     <html lang="fi">
       <body className={inter.className}>
-        <ErrorBoundary level="page" showDetails={process.env.NODE_ENV === 'development'}>
+        <ErrorBoundary level="page" showDetails={false}>
+          <MemoryMonitor />
           <main>
             <ErrorBoundary level="section">
               {children}

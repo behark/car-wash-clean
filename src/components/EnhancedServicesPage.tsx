@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Sparkles, Shield, Star, CheckCircle } from 'lucide-react'
-import { getServices, Service, urlFor } from '../lib/sanity'
+import { getServices, Service, urlFor, cleanupSanityCache } from '../lib/sanity'
 import { mockServices } from '../lib/mockData'
 import { siteConfig } from '../lib/siteConfig'
 import Image from 'next/image'
@@ -13,51 +13,66 @@ export default function EnhancedServicesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // Memoize expensive calculations
+  const categorizedServices = useMemo(() => {
+    const categories = {
+      wash: services.filter(s => s.category === 'wash'),
+      tire: services.filter(s => s.category === 'tire'),
+      additional: services.filter(s => s.category === 'additional'),
+      premium: services.filter(s => s.category === 'premium'),
+    };
+    return categories;
+  }, [services]);
+
+  const fetchServices = useCallback(async () => {
+    try {
+      setLoading(true);
+      const sanityServices = await getServices();
+
+      if (sanityServices && sanityServices.length > 0) {
+        setServices(sanityServices);
+      } else {
+        // Fallback to mock data if no Sanity data
+        console.log('No Sanity services found, using mock data');
+        setServices(mockServices.slice(0, 10)); // Limit mock data
+      }
+    } catch (err) {
+      console.error('Error fetching services:', err);
+      setError('Virhe palveluiden lataamisessa');
+      // Use limited mock data as fallback
+      setServices(mockServices.slice(0, 10));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
 
-    async function fetchServices() {
-      try {
-        if (!isMounted) return;
-        setLoading(true);
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchServices();
+    };
 
-        const sanityServices = await getServices();
-
-        if (!isMounted) return;
-
-        if (sanityServices && sanityServices.length > 0) {
-          setServices(sanityServices);
-        } else {
-          // Fallback to mock data if no Sanity data
-          console.log('No Sanity services found, using mock data');
-          setServices(mockServices);
-        }
-      } catch (err) {
-        if (!isMounted) return;
-        console.error('Error fetching services:', err);
-        setError('Virhe palveluiden lataamisessa');
-        // Use mock data as fallback
-        setServices(mockServices);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchServices();
+    // Delay initial load to reduce memory pressure
+    timeoutId = setTimeout(loadData, 100);
 
     return () => {
       isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+      // Cleanup when component unmounts
+      cleanupSanityCache();
     };
-  }, [])
+  }, [fetchServices])
 
+  // Memory-optimized loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Ladataan palveluita...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 text-sm">Ladataan...</p>
         </div>
       </div>
     )

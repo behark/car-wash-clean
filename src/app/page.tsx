@@ -8,22 +8,25 @@ import { getServices, getTestimonials } from '../lib/sanity'
 import { mockServices, mockTestimonials } from '../lib/mockData'
 
 export default async function HomePage() {
-  // Try to fetch from Sanity, fallback to mock data
-  let services = []
-  let testimonials = []
+  // Memory-optimized data fetching with limits
+  let services: any[] = []
+  let testimonials: any[] = []
 
   try {
-    services = await getServices()
-    testimonials = await getTestimonials()
+    const [servicesData, testimonialsData] = await Promise.allSettled([
+      getServices(),
+      getTestimonials()
+    ])
+
+    services = servicesData.status === 'fulfilled' ? servicesData.value.slice(0, 7) : []
+    testimonials = testimonialsData.status === 'fulfilled' ? testimonialsData.value.slice(0, 6) : []
   } catch (error) {
     console.log('Using mock data - Sanity not connected')
-    services = mockServices
-    testimonials = mockTestimonials
   }
 
-  // Fallback to mock data if Sanity returns empty
-  if (services.length === 0) services = mockServices
-  if (testimonials.length === 0) testimonials = mockTestimonials
+  // Fallback to limited mock data if Sanity returns empty
+  if (services.length === 0) services = mockServices.slice(0, 7)
+  if (testimonials.length === 0) testimonials = mockTestimonials.slice(0, 6)
 
   return (
     <>
