@@ -1,0 +1,47 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0fdfa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ccfbf1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="carGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#gradient)"/>
+
+  <!-- Clean car icon with sparkles -->
+  <g transform="translate(280, 200)">
+    <!-- Car body -->
+    <path d="M0 80 L40 40 L200 40 L240 80 L240 120 L200 120 L200 100 L40 100 L40 120 L0 120 Z" fill="url(#carGradient)" opacity="0.9"/>
+    <!-- Shiny car windows -->
+    <path d="M50 40 L190 40 L210 70 L30 70 Z" fill="#67e8f9" opacity="0.7"/>
+    <!-- Car wheels -->
+    <circle cx="60" cy="120" r="25" fill="#374151"/>
+    <circle cx="180" cy="120" r="25" fill="#374151"/>
+    <circle cx="60" cy="120" r="15" fill="#d1d5db"/>
+    <circle cx="180" cy="120" r="15" fill="#d1d5db"/>
+    <!-- Headlights -->
+    <ellipse cx="240" cy="90" rx="8" ry="15" fill="#fbbf24" opacity="0.9"/>
+    <ellipse cx="240" cy="110" rx="8" ry="8" fill="#ef4444" opacity="0.8"/>
+    <!-- Sparkle effects -->
+    <g opacity="0.8">
+      <!-- Large sparkles -->
+      <path d="M50 20 L55 30 L50 40 L45 30 Z M30 30 L40 35 L30 40 L20 35 Z" fill="url(#sparkleGradient)"/>
+      <path d="M200 25 L205 35 L200 45 L195 35 Z M220 35 L230 40 L220 45 L210 40 Z" fill="url(#sparkleGradient)"/>
+      <!-- Small sparkles -->
+      <circle cx="80" cy="30" r="3" fill="#fbbf24" opacity="0.8"/>
+      <circle cx="160" cy="25" r="2" fill="#f59e0b" opacity="0.9"/>
+      <circle cx="120" cy="35" r="2.5" fill="#fbbf24" opacity="0.7"/>
+    </g>
+  </g>
+
+  <!-- Car Wash Clean branding -->
+  <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#10b981" font-weight="600">Car Wash Clean</text>
+  <text x="50%" y="90%" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#059669" font-weight="400">Autojen kuva ladataan...</text>
+</svg>

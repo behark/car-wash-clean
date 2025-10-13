@@ -250,11 +250,17 @@ export default function BeforeAfterGallery() {
               {/* Before Image */}
               <div className="absolute inset-0">
                 <Image
-                  src={currentImage.before}
+                  src={currentImage.before || '/images/placeholder-vehicle.svg'}
                   alt={`Before: ${currentImage.titleFi}`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== '/images/placeholder-vehicle.svg') {
+                      target.src = '/images/placeholder-vehicle.svg';
+                    }
+                  }}
                 />
                 <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                   ENNEN
@@ -267,11 +273,17 @@ export default function BeforeAfterGallery() {
                 style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
               >
                 <Image
-                  src={currentImage.after}
+                  src={currentImage.after || '/images/placeholder-vehicle.svg'}
                   alt={`After: ${currentImage.titleFi}`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== '/images/placeholder-vehicle.svg') {
+                      target.src = '/images/placeholder-vehicle.svg';
+                    }
+                  }}
                 />
                 <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                   JÄLKEEN
@@ -427,11 +439,17 @@ export default function BeforeAfterGallery() {
                 {/* Before Image */}
                 <div className="absolute inset-0">
                   <Image
-                    src={currentImage.before}
+                    src={currentImage.before || '/images/placeholder-vehicle.svg'}
                     alt={`Before: ${currentImage.titleFi}`}
                     fill
                     className="object-contain"
                     sizes="90vw"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== '/images/placeholder-vehicle.svg') {
+                        target.src = '/images/placeholder-vehicle.svg';
+                      }
+                    }}
                   />
                 </div>
 
@@ -441,11 +459,17 @@ export default function BeforeAfterGallery() {
                   style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                 >
                   <Image
-                    src={currentImage.after}
+                    src={currentImage.after || '/images/placeholder-vehicle.svg'}
                     alt={`After: ${currentImage.titleFi}`}
                     fill
                     className="object-contain"
                     sizes="90vw"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== '/images/placeholder-vehicle.svg') {
+                        target.src = '/images/placeholder-vehicle.svg';
+                      }
+                    }}
                   />
                 </div>
 

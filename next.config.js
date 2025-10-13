@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for better performance
+  // Enable experimental features for better performance and memory optimization
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizeServerReact: true,
+    serverMinification: true,
   },
 
   // Turbo configuration
@@ -47,6 +49,49 @@ const nextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
+
+  // Output and bundle optimizations for memory efficiency
+  output: 'standalone',
+  generateEtags: false,
+
+  // Webpack optimizations for memory
+  webpack: (config, { dev, isServer }) => {
+    // Memory optimization
+    config.optimization = {
+      ...config.optimization,
+      minimize: !dev,
+      sideEffects: false,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true
+          }
+        }
+      }
+    };
+
+    // Reduce memory usage in build
+    if (!dev && !isServer) {
+      config.optimization.usedExports = true;
+      config.optimization.providedExports = true;
+    }
+
+    return config;
+  },
 
   // Headers for better caching
   async headers() {
