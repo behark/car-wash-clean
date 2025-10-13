@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star, CheckCircle, MapPin, Clock, Phone, Mail, Shield, Award } from 'lucide-react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import { siteConfig } from '@/lib/siteConfig'
-import { getServices, getTestimonials } from '@/lib/sanity'
-import { mockServices, mockTestimonials } from '@/lib/mockData'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import { siteConfig } from '../lib/siteConfig'
+import { getServices, getTestimonials } from '../lib/sanity'
+import { mockServices, mockTestimonials } from '../lib/mockData'
 
 export default async function HomePage() {
   // Try to fetch from Sanity, fallback to mock data

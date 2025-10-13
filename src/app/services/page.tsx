@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { Sparkles, Shield, Car, Droplets, Zap, Star, CheckCircle } from 'lucide-react'
-import { mockServices } from '@/lib/mockData'
-import { siteConfig } from '@/lib/siteConfig'
+import { mockServices } from '../../lib/mockData'
+import { siteConfig } from '../../lib/siteConfig'
 import Image from 'next/image'
 import Link from 'next/link'
 

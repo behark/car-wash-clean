@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, Phone } from 'lucide-react'
-import { siteConfig } from '@/lib/siteConfig'
+import { siteConfig } from '../lib/siteConfig'
 
 const navigation = [
   { name: 'Etusivu', href: '/' },

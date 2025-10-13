@@ -19,7 +19,7 @@ import {
   Zap,
   Star
 } from 'lucide-react';
-import { mockServices } from '@/lib/mockData';
+import { mockServices } from '../lib/mockData';
 
 interface Service {
   _id: string;

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { MapPin, Phone, Mail, Clock, MessageSquare } from 'lucide-react'
-import { siteConfig } from '@/lib/siteConfig'
+import { siteConfig } from '../../lib/siteConfig'
 
 export const metadata: Metadata = {
   title: 'Yhteystiedot - PuhtaanPuhdas',

@@ -13,7 +13,7 @@ import {
   Calendar,
   Car
 } from 'lucide-react';
-import { siteConfig } from '@/lib/siteConfig';
+import { siteConfig } from '../lib/siteConfig';
 
 interface ContactMethod {
   id: string;

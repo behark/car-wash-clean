@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Metadata } from 'next'
 import { Calendar, Clock, Car, MapPin, Phone, CheckCircle2, AlertCircle } from 'lucide-react'
 
 const services = [
