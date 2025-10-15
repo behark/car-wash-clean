@@ -10,7 +10,7 @@ export default function MemoryMonitor() {
     if (process.env.NODE_ENV !== 'production') return
     if (typeof window !== 'undefined') return
 
-    console.log('🔍 Starting memory monitoring for car-wash application')
+    // Starting memory monitoring for car-wash application
     const intervalId = startMemoryMonitoring()
 
     // Global error handler for memory issues

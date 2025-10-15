@@ -18,14 +18,14 @@ export default async function HomePage() {
       getTestimonials()
     ])
 
-    services = servicesData.status === 'fulfilled' ? servicesData.value.slice(0, 7) : []
+    services = servicesData.status === 'fulfilled' ? servicesData.value : []
     testimonials = testimonialsData.status === 'fulfilled' ? testimonialsData.value.slice(0, 6) : []
   } catch (error) {
-    console.log('Using mock data - Sanity not connected')
+    // Fallback to mock data when Sanity is not available
   }
 
-  // Fallback to limited mock data if Sanity returns empty
-  if (services.length === 0) services = mockServices.slice(0, 7)
+  // Fallback to all mock data if Sanity returns empty
+  if (services.length === 0) services = mockServices
   if (testimonials.length === 0) testimonials = mockTestimonials.slice(0, 6)
 
   return (

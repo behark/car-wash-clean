@@ -5,6 +5,7 @@ import FloatingContactWidget from '../components/FloatingContactWidget'
 import BookingSystem from '../components/BookingSystem'
 import ErrorBoundary from '../components/ErrorBoundary'
 import MemoryMonitor from '../components/MemoryMonitor'
+import { ToastProvider } from '../components/Toast'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true })
 
@@ -56,20 +57,22 @@ export default function RootLayout({
   return (
     <html lang="fi">
       <body className={inter.className}>
-        <ErrorBoundary level="page" showDetails={false}>
-          <MemoryMonitor />
-          <main>
-            <ErrorBoundary level="section">
-              {children}
+        <ToastProvider>
+          <ErrorBoundary level="page" showDetails={false}>
+            <MemoryMonitor />
+            <main>
+              <ErrorBoundary level="section">
+                {children}
+              </ErrorBoundary>
+            </main>
+            <ErrorBoundary level="component">
+              <FloatingContactWidget />
             </ErrorBoundary>
-          </main>
-          <ErrorBoundary level="component">
-            <FloatingContactWidget />
+            <ErrorBoundary level="component">
+              <BookingSystem />
+            </ErrorBoundary>
           </ErrorBoundary>
-          <ErrorBoundary level="component">
-            <BookingSystem />
-          </ErrorBoundary>
-        </ErrorBoundary>
+        </ToastProvider>
       </body>
     </html>
   )

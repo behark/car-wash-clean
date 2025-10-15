@@ -33,14 +33,14 @@ export default function EnhancedServicesPage() {
         setServices(sanityServices);
       } else {
         // Fallback to mock data if no Sanity data
-        console.log('No Sanity services found, using mock data');
-        setServices(mockServices.slice(0, 10)); // Limit mock data
+        // Fallback to mock data when Sanity is not available
+        setServices(mockServices); // Show all services on services page
       }
     } catch (err) {
       console.error('Error fetching services:', err);
       setError('Virhe palveluiden lataamisessa');
-      // Use limited mock data as fallback
-      setServices(mockServices.slice(0, 10));
+      // Use all mock data as fallback
+      setServices(mockServices);
     } finally {
       setLoading(false);
     }

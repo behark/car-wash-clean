@@ -20,6 +20,8 @@ import {
   Star
 } from 'lucide-react';
 import { mockServices } from '../lib/mockData';
+import { useToast } from './Toast';
+import { generateTimeSlots, TimeSlot as TimeSlotType } from '../lib/timeSlots';
 
 interface Service {
   _id: string;
@@ -35,11 +37,8 @@ interface Service {
   category: 'wash' | 'premium' | 'tire' | 'additional';
 }
 
-interface TimeSlot {
-  time: string;
-  available: boolean;
-  duration: number;
-}
+// Use the TimeSlot interface from the lib
+type TimeSlot = TimeSlotType;
 
 interface BookingData {
   date: string;
@@ -62,6 +61,7 @@ const vehicleTypes = [
 ];
 
 export default function BookingSystem() {
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -80,38 +80,17 @@ export default function BookingSystem() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generate available time slots
-  const generateTimeSlots = useCallback(() => {
-    const slots: TimeSlot[] = [];
-    const startHour = 8;
-    const endHour = 18;
-    const duration = selectedService?.duration || 30;
-
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const endTime = new Date();
-        endTime.setHours(hour, minute + duration);
-
-        // Don't add slot if service would go past closing time
-        if (endTime.getHours() <= endHour) {
-          slots.push({
-            time,
-            available: Math.random() > 0.3, // Simulate availability
-            duration
-          });
-        }
-      }
+  // Generate available time slots using proper logic
+  const updateTimeSlots = useCallback(() => {
+    if (selectedDate) {
+      const slots = generateTimeSlots(selectedDate);
+      setAvailableSlots(slots);
     }
-
-    setAvailableSlots(slots);
-  }, [selectedService]);
+  }, [selectedDate]);
 
   useEffect(() => {
-    if (selectedDate && selectedService) {
-      generateTimeSlots();
-    }
-  }, [selectedDate, selectedService, generateTimeSlots]);
+    updateTimeSlots();
+  }, [updateTimeSlots]);
 
   const getNextAvailableDates = () => {
     const dates = [];
@@ -155,14 +134,38 @@ export default function BookingSystem() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch('/api/booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
 
-    // In real implementation, this would call your booking API
-    console.log('Booking submitted:', bookingData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit booking');
+      }
 
-    setIsSubmitting(false);
-    setCurrentStep(4);
+      const result = await response.json();
+
+      showToast({
+        type: 'success',
+        title: 'Varaus vahvistettu!',
+        message: 'Vahvistussähköposti lähetetty osoitteeseesi.'
+      });
+
+      setCurrentStep(4);
+    } catch (error) {
+      showToast({
+        type: 'error',
+        title: 'Varaus epäonnistui',
+        message: error instanceof Error ? error.message : 'Yritä uudelleen.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetBooking = () => {
@@ -575,6 +578,7 @@ export default function BookingSystem() {
                   <div className="text-sm text-blue-800">
                     <p className="font-medium mb-1">Tärkeää:</p>
                     <ul className="space-y-1 text-xs">
+                      <li>• Tarkista sähköpostisi vahvistuksesta</li>
                       <li>• Saavu 5 minuuttia ennen varattua aikaa</li>
                       <li>• Tuo ajoneuvon avaimet mukaan</li>
                       <li>• Maksu käteisellä tai kortilla paikan päällä</li>

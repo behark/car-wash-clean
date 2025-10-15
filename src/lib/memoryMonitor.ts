@@ -93,7 +93,7 @@ export function startMemoryMonitoring(): NodeJS.Timeout | null {
       forceGarbageCollection();
       lastCleanup = Date.now();
     } else if (usage.used > MEMORY_THRESHOLDS.WARNING && timeSinceCleanup > 60000) {
-      console.log(`📊 Memory usage: ${usage.used}MB (${usage.percentage.toFixed(1)}%)`);
+      // Memory usage monitoring: ${usage.used}MB (${usage.percentage.toFixed(1)}%)
       forceGarbageCollection();
       lastCleanup = Date.now();
     }

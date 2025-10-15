@@ -2,15 +2,17 @@
 
 import { useState } from 'react'
 import { Calendar, Clock, Car, MapPin, Phone, CheckCircle2, AlertCircle } from 'lucide-react'
+import { mockServices } from '@/lib/mockData'
+import { useToast } from '@/components/Toast'
 
-const services = [
-  { id: 'express', name: 'Pika-pesu', price: 10, duration: 15 },
-  { id: 'basic', name: 'Perupesu', price: 15, duration: 30 },
-  { id: 'interior', name: 'Sisäpuhdistus', price: 20, duration: 40 },
-  { id: 'premium', name: 'Premium-pesu', price: 25, duration: 45 },
-  { id: 'wax', name: 'Vahaus & Suojaus', price: 35, duration: 60 },
-  { id: 'full', name: 'Täysipalvelu', price: 40, duration: 90 }
-]
+// Transform mockServices to match the expected format for this component
+const services = mockServices.map(service => ({
+  id: service._id,
+  name: service.titleFi,
+  price: service.price,
+  duration: service.duration,
+  category: service.category
+}))
 
 const timeSlots = [
   '8:00', '8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30',
@@ -19,6 +21,7 @@ const timeSlots = [
 ]
 
 export default function BookingPage() {
+  const { showToast } = useToast();
   const [selectedService, setSelectedService] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
@@ -36,10 +39,55 @@ export default function BookingPage() {
 
   const selectedServiceData = services.find(s => s.id === selectedService)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here would be the actual booking logic
-    setIsSubmitted(true)
+
+    try {
+      const selectedServiceData = services.find(s => s.id === selectedService)
+      if (!selectedServiceData) return
+
+      const bookingData = {
+        date: selectedDate,
+        time: selectedTime,
+        service: {
+          titleFi: selectedServiceData.name,
+          price: selectedServiceData.price,
+          duration: selectedServiceData.duration
+        },
+        customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
+        customerPhone: customerInfo.phone,
+        customerEmail: customerInfo.email,
+        vehicleType: customerInfo.carModel || 'Not specified',
+        specialRequests: customerInfo.notes
+      }
+
+      const response = await fetch('/api/booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to submit booking')
+      }
+
+      showToast({
+        type: 'success',
+        title: 'Varaus vahvistettu!',
+        message: 'Vahvistussähköposti lähetetty osoitteeseesi.'
+      });
+
+      setIsSubmitted(true)
+    } catch (error) {
+      showToast({
+        type: 'error',
+        title: 'Varaus epäonnistui',
+        message: error instanceof Error ? error.message : 'Yritä uudelleen.'
+      });
+    }
   }
 
   const nextStep = () => {
@@ -119,40 +167,176 @@ export default function BookingPage() {
           {bookingStep === 1 && (
             <div className="bg-white rounded-lg shadow-sm p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Valitse palvelu</h2>
-              <div className="grid gap-4">
-                {services.map((service) => (
-                  <div
-                    key={service.id}
-                    className={`relative rounded-lg border p-4 cursor-pointer transition-colors ${
-                      selectedService === service.id
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    onClick={() => setSelectedService(service.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <input
-                          type="radio"
-                          name="service"
-                          value={service.id}
-                          checked={selectedService === service.id}
-                          onChange={() => setSelectedService(service.id)}
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-600 border-gray-300"
-                        />
-                        <div className="ml-3">
-                          <label className="text-lg font-medium text-gray-900 cursor-pointer">
-                            {service.name}
-                          </label>
-                          <p className="text-sm text-gray-600">Kesto: {service.duration} min</p>
+
+              {/* Service Categories */}
+              <div className="space-y-6">
+                {/* Wash Services */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    Pesupalvelut
+                  </h3>
+                  <div className="grid gap-3">
+                    {services.filter(service => service.category === 'wash').map((service) => (
+                      <div
+                        key={service.id}
+                        className={`relative rounded-lg border p-4 cursor-pointer transition-colors ${
+                          selectedService === service.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        onClick={() => setSelectedService(service.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="service"
+                              value={service.id}
+                              checked={selectedService === service.id}
+                              onChange={() => setSelectedService(service.id)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-600 border-gray-300"
+                            />
+                            <div className="ml-3">
+                              <label className="text-lg font-medium text-gray-900 cursor-pointer">
+                                {service.name}
+                              </label>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-blue-600">€{service.price}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold text-purple-600">€{service.price}</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Premium Services */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                    Premium-palvelut
+                  </h3>
+                  <div className="grid gap-3">
+                    {services.filter(service => service.category === 'premium').map((service) => (
+                      <div
+                        key={service.id}
+                        className={`relative rounded-lg border p-4 cursor-pointer transition-colors ${
+                          selectedService === service.id
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        onClick={() => setSelectedService(service.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="service"
+                              value={service.id}
+                              checked={selectedService === service.id}
+                              onChange={() => setSelectedService(service.id)}
+                              className="h-4 w-4 text-purple-600 focus:ring-purple-600 border-gray-300"
+                            />
+                            <div className="ml-3">
+                              <label className="text-lg font-medium text-gray-900 cursor-pointer">
+                                {service.name}
+                              </label>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-purple-600">€{service.price}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tire Services */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    Rengaspalvelut
+                  </h3>
+                  <div className="grid gap-3">
+                    {services.filter(service => service.category === 'tire').map((service) => (
+                      <div
+                        key={service.id}
+                        className={`relative rounded-lg border p-4 cursor-pointer transition-colors ${
+                          selectedService === service.id
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        onClick={() => setSelectedService(service.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="service"
+                              value={service.id}
+                              checked={selectedService === service.id}
+                              onChange={() => setSelectedService(service.id)}
+                              className="h-4 w-4 text-green-600 focus:ring-green-600 border-gray-300"
+                            />
+                            <div className="ml-3">
+                              <label className="text-lg font-medium text-gray-900 cursor-pointer">
+                                {service.name}
+                              </label>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-green-600">€{service.price}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Services */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+                    Lisäpalvelut
+                  </h3>
+                  <div className="grid gap-3">
+                    {services.filter(service => service.category === 'additional').map((service) => (
+                      <div
+                        key={service.id}
+                        className={`relative rounded-lg border p-4 cursor-pointer transition-colors ${
+                          selectedService === service.id
+                            ? 'border-orange-500 bg-orange-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        onClick={() => setSelectedService(service.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="service"
+                              value={service.id}
+                              checked={selectedService === service.id}
+                              onChange={() => setSelectedService(service.id)}
+                              className="h-4 w-4 text-orange-600 focus:ring-orange-600 border-gray-300"
+                            />
+                            <div className="ml-3">
+                              <label className="text-lg font-medium text-gray-900 cursor-pointer">
+                                {service.name}
+                              </label>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-orange-600">€{service.price}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="mt-8 flex justify-end">
                 <button
@@ -210,7 +394,6 @@ export default function BookingPage() {
                   <h3 className="font-semibold text-gray-900 mb-2">Varauksesi yhteenveto:</h3>
                   <div className="space-y-1 text-sm text-gray-700">
                     <p><strong>Palvelu:</strong> {selectedServiceData.name} (€{selectedServiceData.price})</p>
-                    <p><strong>Kesto:</strong> {selectedServiceData.duration} minuuttia</p>
                     <p><strong>Aika:</strong> {selectedDate} klo {selectedTime}</p>
                   </div>
                 </div>
