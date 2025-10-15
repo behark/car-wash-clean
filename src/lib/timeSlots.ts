@@ -76,14 +76,14 @@ export function bookTimeSlot(date: string, time: string): boolean {
 }
 
 // Function to check if a specific slot is available
-export function isSlotAvailable(date: string, time: string, duration: number = 30): boolean {
-  const slots = generateTimeSlots(date, duration);
+export function isSlotAvailable(date: string, time: string): boolean {
+  const slots = generateTimeSlots(date);
   const slot = slots.find(s => s.time === time);
   return slot?.available || false;
 }
 
 // Get next available slots for quick booking
-export function getNextAvailableSlots(serviceDuration: number = 30, daysToCheck: number = 7): Array<{date: string, time: string}> {
+export function getNextAvailableSlots(daysToCheck: number = 7): Array<{date: string, time: string}> {
   const availableSlots: Array<{date: string, time: string}> = [];
   const today = new Date();
 
@@ -92,7 +92,7 @@ export function getNextAvailableSlots(serviceDuration: number = 30, daysToCheck:
     checkDate.setDate(today.getDate() + i);
     const dateString = checkDate.toISOString().split('T')[0];
 
-    const slots = generateTimeSlots(dateString, serviceDuration);
+    const slots = generateTimeSlots(dateString);
     const firstAvailable = slots.find(slot => slot.available);
 
     if (firstAvailable) {
