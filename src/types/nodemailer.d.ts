@@ -26,6 +26,7 @@ declare module 'nodemailer' {
 
   function createTransport(config: TransporterConfig): Transporter;
 
-  export = { createTransport };
-  export default { createTransport };
+  const nodemailer = { createTransport };
+  export = nodemailer;
+  export default nodemailer;
 }

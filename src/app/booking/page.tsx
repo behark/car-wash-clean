@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Calendar, Clock, Car, MapPin, Phone, CheckCircle2, AlertCircle } from 'lucide-react'
 import { mockServices } from '@/lib/mockData'
 import { useToast } from '@/components/Toast'
@@ -107,12 +108,12 @@ export default function BookingPage() {
           <p className="text-gray-600 mb-8">
             Olemme lähettäneet vahvistuksen sähköpostiisi. Nähdään {selectedDate} klo {selectedTime}!
           </p>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center rounded-md bg-purple-600 px-6 py-3 text-sm font-semibold text-white hover:bg-purple-500 transition-colors"
           >
             Takaisin etusivulle
-          </a>
+          </Link>
         </div>
       </div>
     )
