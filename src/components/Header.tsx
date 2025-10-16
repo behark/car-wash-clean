@@ -1,134 +1,116 @@
 'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { siteConfig } from '../lib/siteConfig'
 import { useState } from 'react'
+import Link from 'next/link'
+import { Menu, X, Home, Phone } from 'lucide-react'
+import { siteConfig } from '@/lib/siteConfig'
 
 export default function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const navigation = [
+    { name: 'Etusivu', href: '/', icon: Home },
+    { name: 'Palvelut', href: '/services' },
+    { name: 'Galleria', href: '/gallery' },
+    { name: 'Arvostelut', href: '/testimonials' },
+    { name: 'Meistä', href: '/about' },
+    { name: 'Yhteystiedot', href: '/contact' },
+  ]
 
   return (
-    <header className="fixed w-full top-0 z-50 bg-navy-900/95 backdrop-blur-md border-b border-silver-200/20 shadow-xl">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20">
+    <header className="bg-white shadow-sm sticky top-0 z-50">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            {siteConfig.logoPath && (
-              <div className="relative w-10 h-10">
-                <Image
-                  src={siteConfig.logoPath}
-                  alt={siteConfig.name}
-                  fill
-                  className="object-contain group-hover:scale-105 transition-transform duration-300"
-                />
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-xl">K&L</span>
               </div>
-            )}
-            <div className="flex flex-col">
-              <span className="text-xl font-display font-bold text-white group-hover:text-gold-400 transition-colors">
-                {siteConfig.shortName}
-              </span>
-              <span className="text-xs text-silver-300 hidden sm:block">Kiilto & Loisto</span>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <Link href="/services" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Palvelut
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link href="/gallery" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Galleria
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link href="/testimonials" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Arvostelut
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link href="/about" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Tietoa meistä
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link href="/contact" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Yhteystiedot
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-          </nav>
-
-          {/* Contact & CTA */}
-          <div className="hidden md:flex items-center space-x-4">
-            <a
-              href={`tel:${siteConfig.phone.tel}`}
-              className="flex items-center space-x-2 text-silver-200 hover:text-gold-400 transition-colors group"
-            >
-              <div className="w-8 h-8 bg-gold-500/20 rounded-full flex items-center justify-center group-hover:bg-gold-500/30 transition-colors">
-                <svg className="w-4 h-4 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+              <div className="hidden sm:block">
+                <div className="text-lg font-bold text-slate-900">{siteConfig.shortName}</div>
+                <div className="text-xs text-slate-600">Autopesupalvelu</div>
               </div>
-              <span className="font-semibold">{siteConfig.phone.display}</span>
-            </a>
-
-            <Link
-              href="/booking"
-              className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-navy-900 font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              Varaa aika
             </Link>
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="lg:hidden text-silver-200 focus:outline-none focus:ring-2 focus:ring-gold-500 rounded-lg p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg className={`w-6 h-6 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex lg:gap-x-6 items-center">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-sm font-medium text-slate-700 hover:text-purple-600 transition-colors flex items-center gap-1"
+              >
+                {item.icon && <item.icon className="w-4 h-4" />}
+                {item.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Phone (Desktop) */}
+            <a
+              href={`tel:${siteConfig.phone.tel}`}
+              className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-purple-600 transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              <span className="hidden md:inline">{siteConfig.phone.display}</span>
+            </a>
+
+            {/* Book Button */}
+            <Link
+              href="/booking"
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 shadow-md"
+            >
+              Varaa aika
+            </Link>
+
+            {/* Mobile menu button */}
+            <button
+              type="button"
+              className="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
-            </svg>
-          </button>
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className={`lg:hidden overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <nav className="py-4 space-y-2 border-t border-silver-600/30 overflow-y-auto">
-            <Link href="/services" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Palvelut
-            </Link>
-            <Link href="/gallery" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Galleria
-            </Link>
-            <Link href="/testimonials" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Arvostelut
-            </Link>
-            <Link href="/about" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Tietoa meistä
-            </Link>
-            <Link href="/contact" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Yhteystiedot
-            </Link>
-            <div className="pt-4 border-t border-silver-600/30">
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-slate-200 mt-2">
+            <div className="space-y-1">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex items-center gap-2 rounded-lg px-4 py-3 text-base font-medium text-slate-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.icon && <item.icon className="w-5 h-5" />}
+                  {item.name}
+                </Link>
+              ))}
+
+              {/* Mobile Phone Link */}
               <a
                 href={`tel:${siteConfig.phone.tel}`}
-                className="block px-4 py-3 text-gold-400 font-semibold"
+                className="flex items-center gap-2 rounded-lg px-4 py-3 text-base font-medium text-slate-700 hover:bg-purple-50 hover:text-purple-600 transition-colors border-t border-slate-200 mt-2 pt-4"
               >
-                📞 {siteConfig.phone.display}
+                <Phone className="w-5 h-5" />
+                {siteConfig.phone.display}
               </a>
-              <Link
-                href="/booking"
-                className="block mx-4 mt-2 bg-gradient-to-r from-gold-500 to-gold-600 text-navy-900 font-semibold px-6 py-3 rounded-xl text-center transition-all duration-300"
-              >
-                Varaa aika nyt
-              </Link>
             </div>
-          </nav>
-        </div>
-      </div>
+          </div>
+        )}
+      </nav>
     </header>
   )
 }

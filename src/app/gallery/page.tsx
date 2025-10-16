@@ -6,47 +6,47 @@ import Footer from '@/components/Footer'
 import VehicleImageWithFallback from '@/components/VehicleImageWithFallback'
 import { Sparkles, Star } from 'lucide-react'
 
-// Gallery images data
+// Gallery images data - Using reliable placeholder service
 const galleryImages = [
   {
     id: 1,
-    before: 'https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Ennen+Pesua&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Jalkeen+Pesua&font=roboto',
     title: 'Ulkopesu & Kiillotus',
     description: 'Täydellinen ulkopesu ja vahakäsittely'
   },
   {
     id: 2,
-    before: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1622818762765-bc93f2b6e6e9?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Likainen+Sisusta&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Puhdas+Sisusta&font=roboto',
     title: 'Sisäpuhdistus',
     description: 'Syvällinen sisustuksen puhdistus'
   },
   {
     id: 3,
-    before: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Ennen+Detailointia&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Premium+Tulos&font=roboto',
     title: 'Premium Detailing',
     description: 'Kokonaisvaltainen yksityiskohtainen puhdistus'
   },
   {
     id: 4,
-    before: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Likainen+Moottori&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Puhdas+Moottori&font=roboto',
     title: 'Moottoritilan Puhdistus',
     description: 'Ammattitasoinen moottoritilan puhdistus'
   },
   {
     id: 5,
-    before: 'https://images.unsplash.com/photo-1609519858702-e5e6b3d5e1e2?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f34de?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Tahriintuneet+Vanteet&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Kiiluvat+Vanteet&font=roboto',
     title: 'Vanteiden Kiillotus',
     description: 'Vanteiden erikoiskäsittely ja kiillotus'
   },
   {
     id: 6,
-    before: 'https://images.unsplash.com/photo-1611859266238-4b98091d9d9b?w=800&q=80',
-    after: 'https://images.unsplash.com/photo-1621361365424-06f0e1eb5c49?w=800&q=80',
+    before: 'https://placehold.co/800x600/cbd5e1/475569?text=Ennen+Suojausta&font=roboto',
+    after: 'https://placehold.co/800x600/34d399/ffffff?text=Suojattu+Pinta&font=roboto',
     title: 'Keraamisuojaus',
     description: 'Kestävä keraamisuojaus'
   }
