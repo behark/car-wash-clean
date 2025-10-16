@@ -151,20 +151,77 @@ const services = [
         ],
         popular: false,
         icon: Star
+      },
+      {
+        name: 'Nahkaistuimien Hoito',
+        price: '75€',
+        description: 'Erikoishoito nahkapinnoille',
+        features: [
+          'Perusteellinen puhdistus',
+          'Nahkaöljy',
+          'UV-suoja',
+          'Säilyttää nahan joustavuuden',
+          'Pitkäaikainen suoja'
+        ],
+        popular: false,
+        icon: Sparkles
+      }
+    ]
+  },
+  {
+    id: 4,
+    category: 'Lisäpalvelut',
+    items: [
+      {
+        name: 'Hajunpoisto Ozonilla',
+        price: '45€',
+        description: 'Tehokas hajunpoisto ozonisaattorilla',
+        features: [
+          'Poistaa tupakan hajun',
+          'Poistaa eläinten hajut',
+          'Bakteerien tuhoaminen',
+          'Raikas lopputulos',
+          'Turvallinen menetelmä'
+        ],
+        popular: false,
+        icon: Droplets
+      },
+      {
+        name: 'Lasinpinnoite',
+        price: '35€',
+        description: 'Vesihylkivä pinnoite ikkunoille',
+        features: [
+          'Parantaa näkyvyyttä',
+          'Vesi valuu pois',
+          'Helpottaa talvipuhdistusta',
+          'Kesto 6-12 kuukautta',
+          'Turvallinen ajolle'
+        ],
+        popular: false,
+        icon: Shield
+      },
+      {
+        name: 'Koirankarvojen Poisto',
+        price: '30€',
+        description: 'Erikoispuhdistus lemmikkieläinten jäljiltä',
+        features: [
+          'Tehokas karvojen poisto',
+          'Verhoilun imurointi',
+          'Hajunpoisto',
+          'Erikoistyökalut',
+          'Perusteellinen lopputulos'
+        ],
+        popular: false,
+        icon: Car
       }
     ]
   }
 ]
 
-// Add-on services
-const addOns = [
-  { name: 'Hajunpoisto ozonilla', price: '25€', icon: Droplets },
-  { name: 'Nahkaistuimien hoito', price: '35€', icon: Sparkles },
-  { name: 'Lasinpinnoite', price: '45€', icon: Shield },
-  { name: 'Koirankarvojen poisto', price: '20€', icon: Car }
-]
-
 export default function ServicesPage() {
+
+// Services are now organized in 4 categories with 12 total services
+const services = [
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   const categories = ['all', ...services.map(s => s.category)]
@@ -337,37 +394,7 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* Add-ons Section */}
-        <section className="py-12 sm:py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-                Lisäpalvelut
-              </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Täydennä palveluasi näillä lisäpalveluilla parempaan lopputulokseen
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {addOns.map((addon, index) => {
-                const Icon = addon.icon
-                return (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-br from-slate-50 to-purple-50 rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1"
-                  >
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Icon className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-2">{addon.name}</h3>
-                    <p className="text-2xl font-bold text-purple-600">{addon.price}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
+        {/* Add-ons Section - Removed since all services are now in main categories */}
 
         {/* CTA Section */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-600 to-blue-600 text-white">
