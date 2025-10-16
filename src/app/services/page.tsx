@@ -219,9 +219,6 @@ const services = [
 ]
 
 export default function ServicesPage() {
-
-// Services are now organized in 4 categories with 12 total services
-const services = [
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   const categories = ['all', ...services.map(s => s.category)]
