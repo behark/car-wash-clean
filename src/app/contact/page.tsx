@@ -278,13 +278,32 @@ export default function ContactPage() {
                   className="mt-2 block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
                 >
                   <option value="">Valitse palvelu...</option>
-                  <option value="basic">Pesupesu (€15)</option>
-                  <option value="premium">Premium-pesu (€25)</option>
-                  <option value="interior">Sisäpuhdistus (€20)</option>
-                  <option value="full">Täysipalvelu (€40)</option>
-                  <option value="wax">Vahaus & Suojaus (€35)</option>
-                  <option value="express">Pika-pesu (€10)</option>
-                  <option value="custom">Erikoistoive</option>
+
+                  {/* Autopesut */}
+                  <optgroup label="🚗 Autopesut">
+                    <option value="kasinpesu">Käsinpesu (25€)</option>
+                    <option value="pikavaha">Käsinpesu + Pikavaha (30€)</option>
+                    <option value="sisapuhdistus">Käsinpesu + Sisäpuhdistus (55€)</option>
+                    <option value="normaalivaha">Käsinpesu + Normaalivaha (70€)</option>
+                    <option value="kovavaha">Käsinpesu + Kovavaha (110€)</option>
+                    <option value="kiillotus">Maalipinnan Kiillotus (alk. 350€)</option>
+                  </optgroup>
+
+                  {/* Renkaat */}
+                  <optgroup label="🔧 Renkaat">
+                    <option value="renkaiden-vaihto">Renkaiden Vaihto (20€)</option>
+                    <option value="renkaiden-pesu">Renkaiden Pesu (10€)</option>
+                    <option value="rengashotelli">Rengashotelli (69€)</option>
+                  </optgroup>
+
+                  {/* Lisäpalvelut */}
+                  <optgroup label="✨ Lisäpalvelut">
+                    <option value="moottorin-pesu">Moottorin Pesu (20€)</option>
+                    <option value="hajunpoisto">Hajunpoisto Otsonoinnilla (50€)</option>
+                    <option value="penkkien-pesu">Penkkien Pesu (100€)</option>
+                  </optgroup>
+
+                  <option value="custom">Muu palvelu / Erikoistoive</option>
                 </select>
               </div>
 
@@ -332,7 +351,7 @@ export default function ContactPage() {
           </h2>
           <div className="rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
             <iframe
-              src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${encodeURIComponent(`${siteConfig.address.street}, ${siteConfig.address.city}`)}`}
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(`${siteConfig.address.street}, ${siteConfig.address.city}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
               width="100%"
               height="450"
               style={{ border: 0 }}
