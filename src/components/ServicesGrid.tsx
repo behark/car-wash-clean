@@ -107,7 +107,7 @@ export default function ServicesGrid({ services }: { services: Service[] }) {
                 </div>
 
                 <Link
-                  href={`/services/${serviceId}`}
+                  href="/booking"
                   className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
                   Varaa nyt
