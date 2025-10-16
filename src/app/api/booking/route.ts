@@ -19,12 +19,18 @@ interface BookingData {
 
 // Extract WhatsApp notification to separate function
 async function sendWhatsAppNotification(data: BookingData, bookingId: string) {
+  console.log('🔍 Checking WhatsApp configuration...');
+
   if (!process.env.BUSINESS_WHATSAPP_NUMBER || !process.env.TWILIO_ACCOUNT_SID) {
     console.log('⚠️ WhatsApp not configured, skipping notification');
+    console.log('- BUSINESS_WHATSAPP_NUMBER:', !!process.env.BUSINESS_WHATSAPP_NUMBER);
+    console.log('- TWILIO_ACCOUNT_SID:', !!process.env.TWILIO_ACCOUNT_SID);
+    console.log('- TWILIO_AUTH_TOKEN:', !!process.env.TWILIO_AUTH_TOKEN);
     return;
   }
 
   try {
+    console.log('📱 Initializing Twilio client...');
     const twilio = (await import('twilio')).default;
     const client = twilio(
       process.env.TWILIO_ACCOUNT_SID,
@@ -50,13 +56,19 @@ async function sendWhatsAppNotification(data: BookingData, bookingId: string) {
 
 ${data.specialRequests ? `📝 Notes: ${data.specialRequests}` : '✅ No special requests'}`;
 
-    await client.messages.create({
+    console.log('📤 Sending WhatsApp message...');
+    console.log('- From:', process.env.TWILIO_WHATSAPP_FROM);
+    console.log('- To:', process.env.BUSINESS_WHATSAPP_NUMBER);
+
+    const message = await client.messages.create({
       from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`,
       to: `whatsapp:${process.env.BUSINESS_WHATSAPP_NUMBER}`,
       body: businessMessage
     });
 
     console.log('✅ WhatsApp business notification sent successfully');
+    console.log('- Message SID:', message.sid);
+    console.log('- Status:', message.status);
   } catch (error) {
     console.error('❌ WhatsApp business notification failed:', error);
     throw error; // Let Promise.allSettled handle it
@@ -198,6 +210,15 @@ export async function POST(request: NextRequest) {
     ]).then((results) => {
       const successful = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.filter(r => r.status === 'rejected').length;
+
+      // Log detailed results for debugging
+      results.forEach((result, index) => {
+        const notificationTypes = ['Customer email', 'Business email', 'WhatsApp'];
+        if (result.status === 'rejected') {
+          console.error(`❌ ${notificationTypes[index]} failed:`, result.reason);
+        }
+      });
+
       console.log(`🎉 Notifications completed for ${bookingId}: ${successful} successful, ${failed} failed`);
     });
 
