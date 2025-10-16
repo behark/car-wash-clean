@@ -89,11 +89,52 @@ export default function BookingPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      // Prepare booking data
+      const bookingData = {
+        date: selectedDate,
+        time: selectedTime,
+        service: {
+          titleFi: selectedServiceData?.name || '',
+          price: selectedServiceData?.price || 0,
+          duration: 60 // Default duration
+        },
+        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerPhone: formData.phone,
+        customerEmail: formData.email,
+        vehicleType: formData.carModel || 'Ei määritelty',
+        specialRequests: formData.notes || ''
+      }
 
-    setIsSubmitting(false)
-    setIsComplete(true)
+      console.log('🚀 Submitting booking:', bookingData)
+
+      // Send to API - FIXED ENDPOINT
+      const response = await fetch('/api/booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      })
+
+      console.log('📡 Response status:', response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('❌ API Error:', errorData)
+        throw new Error(errorData.error || 'Varaus epäonnistui')
+      }
+
+      const result = await response.json()
+      console.log('✅ Booking successful:', result)
+
+      setIsSubmitting(false)
+      setIsComplete(true)
+    } catch (error) {
+      console.error('💥 Booking failed:', error)
+      setIsSubmitting(false)
+      alert(error instanceof Error ? error.message : 'Varaus epäonnistui. Yritä uudelleen.')
+    }
   }
 
   const nextStep = () => {

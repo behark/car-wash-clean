@@ -133,6 +133,10 @@ export default function BookingSystem() {
     setIsSubmitting(true)
 
     try {
+      console.log('🚀 Submitting booking data:', bookingData)
+      console.log('🌐 Current URL:', window.location.href)
+      console.log('📍 Submitting to:', '/api/booking')
+
       const response = await fetch('/api/booking', {
         method: 'POST',
         headers: {
@@ -141,12 +145,19 @@ export default function BookingSystem() {
         body: JSON.stringify(bookingData),
       })
 
+      console.log('📡 Response received!')
+      console.log('📡 Response status:', response.status)
+      console.log('📡 Response ok:', response.ok)
+      console.log('📡 Response headers:', response.headers)
+
       if (!response.ok) {
         const errorData = await response.json()
+        console.error('❌ API Error:', errorData)
         throw new Error(errorData.error || 'Failed to submit booking')
       }
 
       const result = await response.json()
+      console.log('✅ Booking successful:', result)
 
       showToast({
         type: 'success',
@@ -156,6 +167,7 @@ export default function BookingSystem() {
 
       setCurrentStep(4)
     } catch (error) {
+      console.error('💥 Booking submission failed:', error)
       showToast({
         type: 'error',
         title: 'Varaus epäonnistui',
