@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePhoneNumber, validateEmail, validateName } from '@/lib/validation';
 import { sendBookingConfirmationEmail, sendBusinessNotificationEmail } from '@/lib/email';
+import twilio from 'twilio';
 
 interface BookingData {
   date: string;
@@ -31,7 +32,6 @@ async function sendWhatsAppNotification(data: BookingData, bookingId: string) {
 
   try {
     console.log('📱 Initializing Twilio client...');
-    const twilio = (await import('twilio')).default;
     const client = twilio(
       process.env.TWILIO_ACCOUNT_SID,
       process.env.TWILIO_AUTH_TOKEN
