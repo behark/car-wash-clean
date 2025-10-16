@@ -1,30 +1,63 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import FloatingContactWidget from '../components/FloatingContactWidget'
-import BookingSystem from '../components/BookingSystem'
 import ErrorBoundary from '../components/ErrorBoundary'
 import MemoryMonitor from '../components/MemoryMonitor'
 import { ToastProvider } from '../components/Toast'
 
-const inter = Inter({ subsets: ['latin'], display: 'swap', preload: true })
+const inter = Inter({ 
+  subsets: ['latin'], 
+  display: 'swap', 
+  preload: true,
+  variable: '--font-inter',
+})
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' }
+  ],
+}
 
 export const metadata: Metadata = {
-  title: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua Helsingissä',
-  description: 'PERUS- & ERIKOISPESUT RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta autopesupalvelua Helsingissä.',
-  keywords: ['autopesu', 'käsinpesu', 'renkaiden vaihto', 'Helsinki', 'kiillotus'],
-  authors: [{ name: 'Kiilto & Loisto' }],
+  metadataBase: new URL('https://www.kiiltoloisto.fi'),
+  title: {
+    default: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua Helsingissä',
+    template: '%s | Kiilto & Loisto'
+  },
+  description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta autopesupalvelua Helsingissä. Varaa aika helposti verkossa!',
+  keywords: [
+    'autopesu Helsinki', 
+    'käsinpesu', 
+    'renkaiden vaihto', 
+    'sisäpuhdistus',
+    'kiillotus', 
+    'vahaus',
+    'Kiilto & Loisto'
+  ],
+  authors: [{ name: 'Kiilto & Loisto', url: 'https://www.kiiltoloisto.fi' }],
+  creator: 'Kiilto & Loisto',
+  publisher: 'Kiilto & Loisto',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: 'Autopesu Kiilto & Loisto',
-    description: 'PERUS- & ERIKOISPESUT RENKAIDEN VAIHTO & SÄILYTYS',
+    title: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua',
+    description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta palvelua Helsingissä.',
     url: 'https://www.kiiltoloisto.fi',
     siteName: 'Kiilto & Loisto',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2000&auto=format&fit=crop',
-        width: 2000,
-        height: 1200,
-        alt: 'Autopesu Kiilto & Loisto',
+        url: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1200&h=630&auto=format&fit=crop',
+        width: 1200,
+        height: 630,
+        alt: 'Autopesu Kiilto & Loisto - Ammattitasoinen autopesu',
       },
     ],
     locale: 'fi_FI',
@@ -33,8 +66,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Autopesu Kiilto & Loisto',
-    description: 'PERUS- & ERIKOISPESUT RENKAIDEN VAIHTO & SÄILYTYS',
-    images: ['https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2000&auto=format&fit=crop'],
+    description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS',
+    images: ['https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1200&h=630&auto=format&fit=crop'],
   },
   robots: {
     index: true,
@@ -47,6 +80,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  alternates: {
+    canonical: 'https://www.kiiltoloisto.fi',
+  },
 }
 
 export default function RootLayout({
@@ -54,22 +90,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const isDevelopment = process.env.NODE_ENV === 'development'
+
   return (
-    <html lang="fi">
+    <html lang="fi" className={inter.variable}>
       <body className={inter.className}>
         <ToastProvider>
-          <ErrorBoundary level="page" showDetails={false}>
-            <MemoryMonitor />
-            <main>
-              <ErrorBoundary level="section">
-                {children}
-              </ErrorBoundary>
-            </main>
-            <ErrorBoundary level="component">
-              <FloatingContactWidget />
-            </ErrorBoundary>
-            <ErrorBoundary level="component">
-              <BookingSystem />
+          <ErrorBoundary level="page" showDetails={isDevelopment}>
+            {/* Memory Monitor only in development */}
+            {isDevelopment && <MemoryMonitor />}
+            
+            {/* Main content */}
+            <ErrorBoundary level="section">
+              {children}
             </ErrorBoundary>
           </ErrorBoundary>
         </ToastProvider>
