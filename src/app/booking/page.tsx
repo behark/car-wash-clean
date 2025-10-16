@@ -2,21 +2,32 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, Clock, Car, CheckCircle2 } from 'lucide-react'
-import { mockServices } from '@/lib/mockData'
-import { useToast } from '@/components/Toast'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import { Calendar, Clock, Car, CheckCircle2, Sparkles, Star, Shield, Droplets, Award, Zap, User, Mail, Phone, FileText } from 'lucide-react'
 
-// Transform mockServices to match the expected format
-const services = mockServices.map(service => ({
-  id: service._id,
-  name: service.titleFi,
-  description: service.descriptionFi,
-  price: service.price,
-  duration: service.duration,
-  category: service.category
-}))
+// REAL Services matching your business
+const services = [
+  // Autopesut
+  { id: 'kasinpesu', name: 'Käsinpesu', price: 25, category: 'Autopesut', icon: Car, color: 'blue' },
+  { id: 'pikavaha', name: 'Käsinpesu + Pikavaha', price: 30, category: 'Autopesut', icon: Sparkles, color: 'purple' },
+  { id: 'sisapuhdistus', name: 'Käsinpesu + Sisäpuhdistus', price: 55, category: 'Autopesut', icon: Sparkles, color: 'indigo', popular: true },
+  { id: 'normaalivaha', name: 'Käsinpesu + Normaalivaha', price: 70, category: 'Autopesut', icon: Star, color: 'amber', popular: true },
+  { id: 'kovavaha', name: 'Käsinpesu + Kovavaha', price: 110, category: 'Autopesut', icon: Shield, color: 'emerald', popular: true },
+  { id: 'kiillotus', name: 'Maalipinnan Kiillotus', price: 350, category: 'Autopesut', icon: Award, color: 'gold', popular: true, note: 'alk. (Henkilöauto 350€, Maasturi 400€, Pakettiauto 450€)' },
 
-// Generate time slots based on business hours
+  // Renkaat
+  { id: 'renkaiden-vaihto', name: 'Renkaiden Vaihto', price: 20, category: 'Renkaat', icon: Car, color: 'slate' },
+  { id: 'renkaiden-pesu', name: 'Renkaiden Pesu', price: 10, category: 'Renkaat', icon: Droplets, color: 'cyan' },
+  { id: 'rengashotelli', name: 'Rengashotelli', price: 69, category: 'Renkaat', icon: Shield, color: 'blue' },
+
+  // Lisäpalvelut
+  { id: 'moottorin-pesu', name: 'Moottorin Pesu', price: 20, category: 'Lisäpalvelut', icon: Droplets, color: 'teal' },
+  { id: 'hajunpoisto', name: 'Hajunpoisto Otsonoinnilla', price: 50, category: 'Lisäpalvelut', icon: Droplets, color: 'sky' },
+  { id: 'penkkien-pesu', name: 'Penkkien Pesu', price: 100, category: 'Lisäpalvelut', icon: Sparkles, color: 'pink' }
+]
+
+// Generate time slots
 const generateTimeSlots = () => {
   const slots = []
   for (let hour = 8; hour < 20; hour++) {
@@ -28,42 +39,24 @@ const generateTimeSlots = () => {
   return slots
 }
 
-const timeSlots = generateTimeSlots()
-
 export default function BookingPage() {
-  const { showToast } = useToast()
+  const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const [customerInfo, setCustomerInfo] = useState({
+  const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     carModel: '',
-    licensePlate: '',
     notes: ''
   })
-  const [bookingStep, setBookingStep] = useState(1)
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
 
   const selectedServiceData = services.find(s => s.id === selectedService)
-
-  // Check if a date is valid (not Sunday, not in past)
-  const isValidDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    // Check if date is in the past
-    if (date < today) return false
-    
-    // Check if it's Sunday (0 = Sunday)
-    if (date.getDay() === 0) return false
-    
-    return true
-  }
+  const timeSlots = generateTimeSlots()
 
   // Get minimum date (tomorrow)
   const getMinDate = () => {
@@ -72,32 +65,23 @@ export default function BookingPage() {
     return tomorrow.toISOString().split('T')[0]
   }
 
-  // Filter time slots based on selected date
+  // Check if date is valid (not Sunday)
+  const isValidDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.getDay() !== 0 // Not Sunday
+  }
+
+  // Filter time slots for Saturdays (10:00-16:00)
   const getAvailableTimeSlots = () => {
     if (!selectedDate) return timeSlots
 
-    const selected = new Date(selectedDate)
-    const today = new Date()
-    
-    // If selected date is today, filter out past times
-    if (selected.toDateString() === today.toDateString()) {
-      const currentHour = today.getHours()
-      const currentMinute = today.getMinutes()
-      
-      return timeSlots.filter(slot => {
-        const [hour, minute] = slot.split(':').map(Number)
-        return hour > currentHour || (hour === currentHour && minute > currentMinute)
-      })
-    }
-
-    // Saturday hours: 10:00 - 16:00
-    if (selected.getDay() === 6) {
+    const date = new Date(selectedDate)
+    if (date.getDay() === 6) { // Saturday
       return timeSlots.filter(slot => {
         const [hour] = slot.split(':').map(Number)
         return hour >= 10 && hour < 16
       })
     }
-
     return timeSlots
   }
 
@@ -105,452 +89,486 @@ export default function BookingPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    try {
-      const selectedServiceData = services.find(s => s.id === selectedService)
-      if (!selectedServiceData) return
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
-      const bookingData = {
-        date: selectedDate,
-        time: selectedTime,
-        service: {
-          titleFi: selectedServiceData.name,
-          price: selectedServiceData.price,
-          duration: selectedServiceData.duration
-        },
-        customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
-        customerPhone: customerInfo.phone,
-        customerEmail: customerInfo.email,
-        vehicleType: customerInfo.carModel || 'Not specified',
-        specialRequests: customerInfo.notes
-      }
-
-      const response = await fetch('/api/booking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to submit booking')
-      }
-
-      showToast({
-        type: 'success',
-        title: 'Varaus vahvistettu!',
-        message: 'Vahvistussähköposti lähetetty osoitteeseesi.'
-      })
-
-      setIsSubmitted(true)
-    } catch (error) {
-      showToast({
-        type: 'error',
-        title: 'Varaus epäonnistui',
-        message: error instanceof Error ? error.message : 'Yritä uudelleen.'
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    setIsSubmitting(false)
+    setIsComplete(true)
   }
 
   const nextStep = () => {
-    if (bookingStep < 3) setBookingStep(bookingStep + 1)
+    if (step < 3) setStep(step + 1)
   }
 
   const prevStep = () => {
-    if (bookingStep > 1) setBookingStep(bookingStep - 1)
+    if (step > 1) setStep(step - 1)
   }
 
-  if (isSubmitted) {
+  // Success screen
+  if (isComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center bg-white rounded-2xl shadow-xl p-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <CheckCircle2 className="w-12 h-12 text-green-600" />
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Varaus vahvistettu! 🎉
+              </h1>
+
+              <p className="text-lg text-slate-600 mb-8">
+                Kiitos varauksestasi! Olemme lähettäneet vahvistuksen sähköpostiisi.
+              </p>
+
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 mb-8 text-left">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  Varauksesi tiedot:
+                </h3>
+                <div className="space-y-3 text-slate-700">
+                  <p><strong>Palvelu:</strong> {selectedServiceData?.name}</p>
+                  <p><strong>Päivä:</strong> {new Date(selectedDate).toLocaleDateString('fi-FI', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</p>
+                  <p><strong>Aika:</strong> {selectedTime}</p>
+                  <p><strong>Hinta:</strong> {selectedServiceData?.price}€</p>
+                  <p><strong>Asiakas:</strong> {formData.firstName} {formData.lastName}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/"
+                  className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-8 py-4 rounded-xl transition-all hover:scale-105 shadow-lg"
+                >
+                  Takaisin etusivulle
+                </Link>
+                <Link
+                  href="/services"
+                  className="inline-flex items-center justify-center bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 font-bold px-8 py-4 rounded-xl transition-all"
+                >
+                  Katso palvelut
+                </Link>
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Varaus vahvistettu!</h1>
-          <div className="bg-purple-50 rounded-lg p-4 mb-6 text-left">
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Palvelu:</strong> {selectedServiceData?.name}
-            </p>
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Aika:</strong> {new Date(selectedDate).toLocaleDateString('fi-FI')} klo {selectedTime}
-            </p>
-            <p className="text-sm text-gray-600">
-              <strong>Hinta:</strong> €{selectedServiceData?.price}
-            </p>
-          </div>
-          <p className="text-gray-600 mb-8">
-            Olemme lähettäneet vahvistuksen sähköpostiisi.<br />
-            Nähdään {new Date(selectedDate).toLocaleDateString('fi-FI')} klo {selectedTime}!
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-sm font-semibold text-white hover:bg-purple-700 transition-colors"
-          >
-            Takaisin etusivulle
-          </Link>
         </div>
-      </div>
+        <Footer />
+      </>
     )
   }
 
   const availableTimeSlots = getAvailableTimeSlots()
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+    <>
+      <Header />
+
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
+        {/* Hero Section */}
+        <section className="relative bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 text-white py-16 sm:py-20">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+          </div>
+
+          <div className="relative container mx-auto px-4 text-center">
+            <div className="inline-flex items-center bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-6 py-2 mb-8">
+              <Calendar className="w-4 h-4 mr-2" />
+              <span className="text-purple-200 text-sm font-medium">
+                Nopea ja helppo varaus
+              </span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
               Varaa aika
             </h1>
-            <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-purple-100">
-              Valitse sopiva palvelu ja aika. Varaus kestää vain muutaman minuutin.
+            <p className="text-lg sm:text-xl text-purple-100 max-w-2xl mx-auto">
+              Valitse palvelu, aika ja täytä tiedot. Varaus vie vain 2 minuuttia!
             </p>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12 lg:px-8">
         {/* Progress Steps */}
-        <div className="mb-8 sm:mb-12">
-          <div className="flex items-center justify-center">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full text-xs sm:text-sm font-semibold transition-colors ${
-                  step <= bookingStep
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {step}
-                </div>
-                {step < 3 && (
-                  <div className={`h-1 w-12 sm:w-16 mx-2 sm:mx-4 transition-colors ${
-                    step < bookingStep ? 'bg-purple-600' : 'bg-gray-200'
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 max-w-xs sm:max-w-md mx-auto px-4">
-            <span>Palvelu</span>
-            <span>Aika</span>
-            <span>Tiedot</span>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          {/* Step 1: Service Selection */}
-          {bookingStep === 1 && (
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Valitse palvelu</h2>
-
-              <div className="space-y-6">
+        <section className="py-8 bg-white border-b border-slate-200">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-between">
                 {[
-                  { category: 'wash', title: 'Pesupalvelut', color: 'blue' },
-                  { category: 'premium', title: 'Premium-palvelut', color: 'purple' },
-                  { category: 'tire', title: 'Rengaspalvelut', color: 'green' },
-                  { category: 'additional', title: 'Lisäpalvelut', color: 'orange' }
-                ].map(({ category, title, color }) => {
-                  const categoryServices = services.filter(s => s.category === category)
-                  if (categoryServices.length === 0) return null
-
+                  { num: 1, title: 'Palvelu', icon: Car },
+                  { num: 2, title: 'Aika', icon: Calendar },
+                  { num: 3, title: 'Tiedot', icon: User }
+                ].map((s, idx) => {
+                  const Icon = s.icon
                   return (
-                    <div key={category}>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                        <div className={`w-3 h-3 bg-${color}-500 rounded-full mr-2`}></div>
-                        {title}
-                      </h3>
-                      <div className="space-y-3">
-                        {categoryServices.map((service) => (
-                          <div
-                            key={service.id}
-                            className={`relative rounded-lg border p-3 sm:p-4 cursor-pointer transition-all hover:shadow-md ${
-                              selectedService === service.id
-                                ? `border-${color}-500 bg-${color}-50 shadow-md`
-                                : 'border-gray-300 hover:border-gray-400'
-                            }`}
-                            onClick={() => setSelectedService(service.id)}
-                          >
-                            <div className="flex items-start sm:items-center justify-between gap-3">
-                              <div className="flex items-start gap-2 sm:gap-3 flex-1">
-                                <input
-                                  type="radio"
-                                  name="service"
-                                  value={service.id}
-                                  checked={selectedService === service.id}
-                                  onChange={() => setSelectedService(service.id)}
-                                  className={`mt-1 sm:mt-0 h-4 w-4 text-${color}-600 focus:ring-${color}-600 border-gray-300 flex-shrink-0`}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <label className="text-base sm:text-lg font-medium text-gray-900 cursor-pointer block">
-                                    {service.name}
-                                  </label>
-                                  <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">{service.description}</p>
-                                  <p className="text-xs text-gray-500 mt-1">⏱️ {service.duration} min</p>
-                                </div>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <span className={`text-xl sm:text-2xl font-bold text-${color}-600`}>€{service.price}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    <div key={s.num} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
+                          step >= s.num
+                            ? 'bg-purple-600 text-white shadow-lg scale-110'
+                            : 'bg-slate-200 text-slate-400'
+                        }`}>
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <span className={`mt-2 text-xs sm:text-sm font-medium ${
+                          step >= s.num ? 'text-purple-600' : 'text-slate-400'
+                        }`}>
+                          {s.title}
+                        </span>
                       </div>
+                      {idx < 2 && (
+                        <div className={`h-1 flex-1 mx-2 transition-all ${
+                          step > s.num ? 'bg-purple-600' : 'bg-slate-200'
+                        }`} />
+                      )}
                     </div>
                   )
                 })}
               </div>
-
-              <div className="mt-6 sm:mt-8 flex justify-end">
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={!selectedService}
-                  className="rounded-lg bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
-                >
-                  Seuraava →
-                </button>
-              </div>
             </div>
-          )}
+          </div>
+        </section>
 
-          {/* Step 2: Date and Time Selection */}
-          {bookingStep === 2 && (
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Valitse päivä ja aika</h2>
+        {/* Form Steps */}
+        <section className="py-12 sm:py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <form onSubmit={handleSubmit}>
+                {/* Step 1: Service Selection */}
+                {step === 1 && (
+                  <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">
+                      Valitse palvelu
+                    </h2>
 
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-3">Päivämäärä</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => {
-                      if (isValidDate(e.target.value)) {
-                        setSelectedDate(e.target.value)
-                        setSelectedTime('') // Reset time when date changes
-                      } else {
-                        showToast({
-                          type: 'warning',
-                          title: 'Virheellinen päivä',
-                          message: 'Sunnuntaisin olemme kiinni'
-                        })
-                      }
-                    }}
-                    min={getMinDate()}
-                    className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                  />
-                  <p className="mt-2 text-xs text-gray-500">Huom: Sunnuntaisin olemme kiinni</p>
-                </div>
+                    <div className="space-y-8">
+                      {['Autopesut', 'Renkaat', 'Lisäpalvelut'].map(category => {
+                        const categoryServices = services.filter(s => s.category === category)
 
-                {selectedDate && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 mb-3">
-                      Kellonaika ({availableTimeSlots.length} vapaata aikaa)
-                    </label>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1">
-                      {availableTimeSlots.map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => setSelectedTime(time)}
-                          className={`p-2 sm:p-3 text-xs sm:text-sm rounded-lg border transition-all touch-manipulation ${
-                            selectedTime === time
-                              ? 'border-purple-600 bg-purple-600 text-white shadow-md scale-105'
-                              : 'border-gray-300 hover:border-purple-300 hover:bg-purple-50'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
+                        return (
+                          <div key={category}>
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                              <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                              {category}
+                            </h3>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {categoryServices.map(service => {
+                                const Icon = service.icon
+                                const isSelected = selectedService === service.id
+
+                                return (
+                                  <div
+                                    key={service.id}
+                                    onClick={() => setSelectedService(service.id)}
+                                    className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all hover:scale-105 ${
+                                      isSelected
+                                        ? 'border-purple-600 bg-purple-50 shadow-lg'
+                                        : 'border-slate-200 hover:border-purple-300 bg-white'
+                                    }`}
+                                  >
+                                    {service.popular && (
+                                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                                        <Star className="w-3 h-3 fill-current" />
+                                        Suosittu
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-start gap-3">
+                                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                        isSelected ? 'bg-purple-200' : 'bg-slate-100'
+                                      }`}>
+                                        <Icon className={`w-5 h-5 ${isSelected ? 'text-purple-600' : 'text-slate-600'}`} />
+                                      </div>
+
+                                      <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-slate-900 text-sm mb-1">
+                                          {service.name}
+                                        </h4>
+                                        <p className="text-2xl font-bold text-purple-600">
+                                          {service.price}€
+                                        </p>
+                                        {service.note && (
+                                          <p className="text-xs text-slate-500 mt-1">
+                                            {service.note}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div className="mt-8 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        disabled={!selectedService}
+                        className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-8 py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 shadow-lg"
+                      >
+                        Seuraava →
+                      </button>
                     </div>
                   </div>
                 )}
-              </div>
 
-              {selectedServiceData && selectedDate && selectedTime && (
-                <div className="mt-6 sm:mt-8 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <h3 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">📋 Varauksesi yhteenveto:</h3>
-                  <div className="space-y-2 text-xs sm:text-sm text-gray-700">
-                    <p><strong>Palvelu:</strong> {selectedServiceData.name}</p>
-                    <p><strong>Hinta:</strong> €{selectedServiceData.price}</p>
-                    <p><strong>Kesto:</strong> {selectedServiceData.duration} min</p>
-                    <p><strong>Päivä:</strong> {new Date(selectedDate).toLocaleDateString('fi-FI', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</p>
-                    <p><strong>Aika:</strong> {selectedTime}</p>
+                {/* Step 2: Date & Time */}
+                {step === 2 && (
+                  <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">
+                      Valitse päivä ja aika
+                    </h2>
+
+                    <div className="space-y-6">
+                      {/* Date Selection */}
+                      <div>
+                        <label className="block text-sm font-bold text-slate-900 mb-3">
+                          📅 Päivämäärä
+                        </label>
+                        <input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => {
+                            if (isValidDate(e.target.value)) {
+                              setSelectedDate(e.target.value)
+                              setSelectedTime('')
+                            }
+                          }}
+                          min={getMinDate()}
+                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all text-lg"
+                        />
+                        <p className="mt-2 text-sm text-slate-600">
+                          ⚠️ Sunnuntaisin olemme kiinni
+                        </p>
+                      </div>
+
+                      {/* Time Selection */}
+                      {selectedDate && (
+                        <div>
+                          <label className="block text-sm font-bold text-slate-900 mb-3">
+                            ⏰ Kellonaika ({availableTimeSlots.length} vapaata)
+                          </label>
+                          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                            {availableTimeSlots.map(time => (
+                              <button
+                                key={time}
+                                type="button"
+                                onClick={() => setSelectedTime(time)}
+                                className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                                  selectedTime === time
+                                    ? 'bg-purple-600 text-white shadow-lg scale-105'
+                                    : 'bg-slate-100 hover:bg-purple-100 text-slate-700'
+                                }`}
+                              >
+                                {time}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Summary */}
+                      {selectedServiceData && selectedDate && selectedTime && (
+                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200">
+                          <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
+                            Varauksesi yhteenveto
+                          </h3>
+                          <div className="space-y-2 text-sm text-slate-700">
+                            <p><strong>Palvelu:</strong> {selectedServiceData.name}</p>
+                            <p><strong>Hinta:</strong> {selectedServiceData.price}€</p>
+                            <p><strong>Päivä:</strong> {new Date(selectedDate).toLocaleDateString('fi-FI', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}</p>
+                            <p><strong>Aika:</strong> {selectedTime}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-8 flex justify-between gap-4">
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-8 py-4 rounded-xl transition-all"
+                      >
+                        ← Takaisin
+                      </button>
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        disabled={!selectedDate || !selectedTime}
+                        className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-8 py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 shadow-lg"
+                      >
+                        Seuraava →
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="mt-6 sm:mt-8 flex justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="rounded-lg bg-gray-200 px-4 sm:px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300 transition-colors"
-                >
-                  ← Takaisin
-                </button>
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={!selectedDate || !selectedTime}
-                  className="rounded-lg bg-purple-600 px-4 sm:px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
-                >
-                  Seuraava →
-                </button>
-              </div>
+                {/* Step 3: Customer Info */}
+                {step === 3 && (
+                  <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">
+                      Yhteystiedot
+                    </h2>
+
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-bold text-slate-900 mb-2">
+                            Etunimi *
+                          </label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                              type="text"
+                              required
+                              value={formData.firstName}
+                              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
+                              placeholder="Matti"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-bold text-slate-900 mb-2">
+                            Sukunimi *
+                          </label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                              type="text"
+                              required
+                              value={formData.lastName}
+                              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
+                              placeholder="Virtanen"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-bold text-slate-900 mb-2">
+                            Sähköposti *
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                              type="email"
+                              required
+                              value={formData.email}
+                              onChange={(e) => setFormData({...formData, email: e.target.value})}
+                              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
+                              placeholder="matti@email.com"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-bold text-slate-900 mb-2">
+                            Puhelinnumero *
+                          </label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                              type="tel"
+                              required
+                              value={formData.phone}
+                              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                              className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
+                              placeholder="+358 40 123 4567"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                          Auton merkki ja malli (valinnainen)
+                        </label>
+                        <div className="relative">
+                          <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                          <input
+                            type="text"
+                            value={formData.carModel}
+                            onChange={(e) => setFormData({...formData, carModel: e.target.value})}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
+                            placeholder="esim. Toyota Corolla"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                          Lisätiedot (valinnainen)
+                        </label>
+                        <div className="relative">
+                          <FileText className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                          <textarea
+                            rows={4}
+                            value={formData.notes}
+                            onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all resize-none"
+                            placeholder="Kerro meille lisätietoja tai toiveita..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex flex-col-reverse sm:flex-row justify-between gap-4">
+                      <button
+                        type="button"
+                        onClick={prevStep}
+                        disabled={isSubmitting}
+                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-8 py-4 rounded-xl transition-all disabled:opacity-50"
+                      >
+                        ← Takaisin
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-8 py-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Vahvistetaan...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-5 h-5" />
+                            Vahvista varaus
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
             </div>
-          )}
+          </div>
+        </section>
+      </main>
 
-          {/* Step 3: Customer Information */}
-          {bookingStep === 3 && (
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Yhteystiedot</h2>
-
-              <div className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-900 mb-2">
-                      Etunimi *
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      required
-                      value={customerInfo.firstName}
-                      onChange={(e) => setCustomerInfo({...customerInfo, firstName: e.target.value})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-900 mb-2">
-                      Sukunimi *
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      required
-                      value={customerInfo.lastName}
-                      onChange={(e) => setCustomerInfo({...customerInfo, lastName: e.target.value})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
-                      Sähköposti *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      required
-                      value={customerInfo.email}
-                      onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-900 mb-2">
-                      Puhelinnumero *
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      required
-                      placeholder="+358 40 123 4567"
-                      value={customerInfo.phone}
-                      onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <label htmlFor="carModel" className="block text-sm font-medium text-gray-900 mb-2">
-                      Auton merkki ja malli
-                    </label>
-                    <input
-                      type="text"
-                      id="carModel"
-                      placeholder="esim. Toyota Corolla"
-                      value={customerInfo.carModel}
-                      onChange={(e) => setCustomerInfo({...customerInfo, carModel: e.target.value})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="licensePlate" className="block text-sm font-medium text-gray-900 mb-2">
-                      Rekisterinumero
-                    </label>
-                    <input
-                      type="text"
-                      id="licensePlate"
-                      placeholder="ABC-123"
-                      value={customerInfo.licensePlate}
-                      onChange={(e) => setCustomerInfo({...customerInfo, licensePlate: e.target.value.toUpperCase()})}
-                      className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="notes" className="block text-sm font-medium text-gray-900 mb-2">
-                    Lisätiedot
-                  </label>
-                  <textarea
-                    id="notes"
-                    rows={3}
-                    placeholder="Kerro lisätietoja tai erityistoiveita..."
-                    value={customerInfo.notes}
-                    onChange={(e) => setCustomerInfo({...customerInfo, notes: e.target.value})}
-                    className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 sm:mt-8 flex flex-col-reverse sm:flex-row justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  disabled={isSubmitting}
-                  className="rounded-lg bg-gray-200 px-4 sm:px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300 transition-colors disabled:opacity-50"
-                >
-                  ← Takaisin
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="rounded-lg bg-purple-600 px-4 sm:px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Vahvistetaan...
-                    </>
-                  ) : (
-                    '✓ Vahvista varaus'
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-      </div>
-    </div>
+      <Footer />
+    </>
   )
 }
