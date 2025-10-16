@@ -13,8 +13,17 @@ type Service = {
   image?: string
 }
 
+type MockService = {
+  id: number
+  titleFi: string
+  descriptionFi: string
+  priceCents: number
+  durationMinutes: number
+  image: string
+}
+
 // Professional services with car wash business imagery
-const mockServices = [
+const mockServices: MockService[] = [
   {
     id: 1,
     titleFi: "Peruspesu",
@@ -43,12 +52,12 @@ const mockServices = [
 
 export default function ServicesGrid({ services }: { services: Service[] }) {
   // Use mock services if no real services are provided
-  const displayServices = services && services.length > 0 ? services : mockServices
+  const displayServices: Array<Service | MockService> = services && services.length > 0 ? services : mockServices
 
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {displayServices.map((service, index) => {
-        const serviceId = service._id || service.id || index
+        const serviceId = ('_id' in service && service._id) || ('id' in service && service.id) || index
         const price = service.price || (service.priceCents ? service.priceCents / 100 : 0)
         const priceCents = service.priceCents || (service.price ? service.price * 100 : 0)
         
