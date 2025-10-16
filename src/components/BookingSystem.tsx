@@ -1,7 +1,6 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react'
 import {
   Calendar,
   Clock,
@@ -18,56 +17,55 @@ import {
   Shield,
   Zap,
   Star
-} from 'lucide-react';
-import { mockServices } from '../lib/mockData';
-import { useToast } from './Toast';
-import { generateTimeSlots, TimeSlot as TimeSlotType } from '../lib/timeSlots';
+} from 'lucide-react'
+import { mockServices } from '../lib/mockData'
+import { useToast } from './Toast'
+import { generateTimeSlots, TimeSlot as TimeSlotType } from '../lib/timeSlots'
 
 interface Service {
-  _id: string;
-  titleFi: string;
-  titleEn: string;
-  descriptionFi: string;
-  descriptionEn: string;
-  price: number;
-  duration: number;
-  capacity: number;
-  image: string;
-  isActive: boolean;
-  category: 'wash' | 'premium' | 'tire' | 'additional';
+  _id: string
+  titleFi: string
+  titleEn: string
+  descriptionFi: string
+  descriptionEn: string
+  price: number
+  duration: number
+  capacity: number
+  image: string
+  isActive: boolean
+  category: 'wash' | 'premium' | 'tire' | 'additional'
 }
 
-// Use the TimeSlot interface from the lib
-type TimeSlot = TimeSlotType;
+type TimeSlot = TimeSlotType
 
 interface BookingData {
-  date: string;
-  time: string;
-  service: Service;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string;
-  vehicleType: string;
-  specialRequests: string;
+  date: string
+  time: string
+  service: Service
+  customerName: string
+  customerPhone: string
+  customerEmail: string
+  vehicleType: string
+  specialRequests: string
 }
 
-const services: Service[] = mockServices;
+const services: Service[] = mockServices
 
 const vehicleTypes = [
   'Henkilöauto / Car',
   'SUV / Maastoauto',
   'Van / Pakettiauto',
   'Moottoripyörä / Motorcycle'
-];
+]
 
 export default function BookingSystem() {
-  const { showToast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const { showToast } = useToast()
+  const [isOpen, setIsOpen] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedTime, setSelectedTime] = useState('')
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [bookingData, setBookingData] = useState<BookingData>({
     date: '',
     time: '',
@@ -77,28 +75,28 @@ export default function BookingSystem() {
     customerEmail: '',
     vehicleType: vehicleTypes[0],
     specialRequests: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Generate available time slots using proper logic
+  // Generate available time slots
   const updateTimeSlots = useCallback(() => {
     if (selectedDate) {
-      const slots = generateTimeSlots(selectedDate);
-      setAvailableSlots(slots);
+      const slots = generateTimeSlots(selectedDate)
+      setAvailableSlots(slots)
     }
-  }, [selectedDate]);
+  }, [selectedDate])
 
   useEffect(() => {
-    updateTimeSlots();
-  }, [updateTimeSlots]);
+    updateTimeSlots()
+  }, [updateTimeSlots])
 
   const getNextAvailableDates = () => {
-    const dates = [];
-    const today = new Date();
+    const dates = []
+    const today = new Date()
 
     for (let i = 1; i <= 14; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
 
       // Skip Sundays (day 0)
       if (date.getDay() !== 0) {
@@ -109,30 +107,30 @@ export default function BookingSystem() {
             month: 'short',
             day: 'numeric'
           })
-        });
+        })
       }
     }
 
-    return dates;
-  };
+    return dates
+  }
 
   const handleServiceSelect = (service: Service) => {
-    setSelectedService(service);
-    setBookingData(prev => ({ ...prev, service }));
-    setCurrentStep(2);
-  };
+    setSelectedService(service)
+    setBookingData(prev => ({ ...prev, service }))
+    setCurrentStep(2)
+  }
 
   const handleDateTimeSelect = () => {
     setBookingData(prev => ({
       ...prev,
       date: selectedDate,
       time: selectedTime
-    }));
-    setCurrentStep(3);
-  };
+    }))
+    setCurrentStep(3)
+  }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       const response = await fetch('/api/booking', {
@@ -141,38 +139,38 @@ export default function BookingSystem() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit booking');
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to submit booking')
       }
 
-      const result = await response.json();
+      const result = await response.json()
 
       showToast({
         type: 'success',
         title: 'Varaus vahvistettu!',
         message: 'Vahvistussähköposti lähetetty osoitteeseesi.'
-      });
+      })
 
-      setCurrentStep(4);
+      setCurrentStep(4)
     } catch (error) {
       showToast({
         type: 'error',
         title: 'Varaus epäonnistui',
         message: error instanceof Error ? error.message : 'Yritä uudelleen.'
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const resetBooking = () => {
-    setCurrentStep(1);
-    setSelectedService(null);
-    setSelectedDate('');
-    setSelectedTime('');
+    setCurrentStep(1)
+    setSelectedService(null)
+    setSelectedDate('')
+    setSelectedTime('')
     setBookingData({
       date: '',
       time: '',
@@ -182,88 +180,84 @@ export default function BookingSystem() {
       customerEmail: '',
       vehicleType: vehicleTypes[0],
       specialRequests: ''
-    });
-  };
+    })
+  }
 
   if (!isOpen) {
     return (
-      <motion.button
+      <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-20 bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-40 group"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-40 group hover:scale-110 active:scale-95 touch-manipulation"
+        aria-label="Varaa Pesuvuoro"
       >
         <Calendar className="h-6 w-6" />
-        <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+        <div className="hidden sm:block absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
           Varaa Pesuvuoro
           <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
         </div>
-      </motion.button>
-    );
+      </button>
+    )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      className="fixed inset-4 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden"
-    >
-      {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Calendar className="h-6 w-6" />
-            <div>
-              <h2 className="text-xl font-bold">Varaa Pesuvuoro</h2>
-              <p className="text-emerald-100 text-sm">Vaihe {currentStep} / 4</p>
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 animate-fade-in"
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-4 sm:inset-8 md:inset-12 lg:inset-16 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 flex flex-col animate-scale-in">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 sm:p-6 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold">Varaa Pesuvuoro</h2>
+                <p className="text-emerald-100 text-xs sm:text-sm">Vaihe {currentStep} / 4</p>
+              </div>
             </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white/80 hover:text-white p-1 rounded transition-colors"
+              aria-label="Sulje"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="text-white/80 hover:text-white p-1 rounded"
-          >
-            <X className="w-6 h-6" />
-          </button>
+
+          {/* Progress Bar */}
+          <div className="mt-4 bg-emerald-700/30 rounded-full h-2">
+            <div
+              className="bg-white rounded-full h-2 transition-all duration-500"
+              style={{ width: `${(currentStep / 4) * 100}%` }}
+            />
+          </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-4 bg-emerald-700/30 rounded-full h-2">
-          <div
-            className="bg-white rounded-full h-2 transition-all duration-500"
-            style={{ width: `${(currentStep / 4) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6">
-        <AnimatePresence mode="wait">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Step 1: Service Selection */}
           {currentStep === 1 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Valitse Palvelu</h3>
+            <div className="space-y-4 sm:space-y-6 animate-slide-in">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Valitse Palvelu</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {services.map((service) => (
-                  <motion.button
+                  <button
                     key={service._id}
                     onClick={() => handleServiceSelect(service)}
-                    className={`relative p-4 border-2 rounded-xl transition-all duration-200 text-left group hover:scale-105 ${
+                    className={`relative p-4 border-2 rounded-xl transition-all duration-200 text-left hover:scale-105 active:scale-95 touch-manipulation ${
                       service.category === 'wash'
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-blue-500 bg-blue-50 hover:bg-blue-100'
                         : service.category === 'premium'
-                        ? 'border-purple-500 bg-purple-50'
+                        ? 'border-purple-500 bg-purple-50 hover:bg-purple-100'
                         : service.category === 'tire'
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-orange-500 bg-orange-50'
+                        ? 'border-green-500 bg-green-50 hover:bg-green-100'
+                        : 'border-orange-500 bg-orange-50 hover:bg-orange-100'
                     }`}
-                    whileHover={{ y: -2 }}
                   >
                     {service.category === 'premium' && (
                       <div className="absolute -top-2 left-4 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center">
@@ -278,8 +272,8 @@ export default function BookingSystem() {
                     )}
 
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="text-sm font-bold text-gray-900 line-clamp-2">{service.titleFi}</h4>
-                      <div className="text-right">
+                      <h4 className="text-sm font-bold text-gray-900 line-clamp-2 pr-2">{service.titleFi}</h4>
+                      <div className="text-right flex-shrink-0">
                         <div className="text-lg font-bold text-emerald-600">€{service.price}</div>
                       </div>
                     </div>
@@ -299,26 +293,20 @@ export default function BookingSystem() {
                          'Lisäpalvelu'}
                       </span>
                     </div>
-                  </motion.button>
+                  </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Step 2: Date & Time Selection */}
           {currentStep === 2 && selectedService && (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
+            <div className="space-y-4 sm:space-y-6 animate-slide-in">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Valitse Aika</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Valitse Aika</h3>
                 <button
                   onClick={() => setCurrentStep(1)}
-                  className="text-emerald-600 hover:text-emerald-700 font-medium"
+                  className="text-emerald-600 hover:text-emerald-700 font-medium text-sm sm:text-base"
                 >
                   ← Takaisin
                 </button>
@@ -327,31 +315,31 @@ export default function BookingSystem() {
               {/* Selected Service Summary */}
               <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-bold text-emerald-900">{selectedService.titleFi}</h4>
-                    <p className="text-emerald-700 text-sm">{selectedService.descriptionFi}</p>
+                  <div className="flex-1 pr-4">
+                    <h4 className="font-bold text-emerald-900 text-sm sm:text-base">{selectedService.titleFi}</h4>
+                    <p className="text-emerald-700 text-xs sm:text-sm line-clamp-2">{selectedService.descriptionFi}</p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-emerald-600">€{selectedService.price}</div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-lg sm:text-xl font-bold text-emerald-600">€{selectedService.price}</div>
                   </div>
                 </div>
               </div>
 
               {/* Date Selection */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Valitse Päivä</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Valitse Päivä</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {getNextAvailableDates().map((date) => (
                     <button
                       key={date.value}
                       onClick={() => setSelectedDate(date.value)}
-                      className={`p-3 border rounded-lg transition-all ${
+                      className={`p-3 border rounded-lg transition-all touch-manipulation ${
                         selectedDate === date.value
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                          : 'border-gray-200 hover:border-emerald-300'
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 scale-105'
+                          : 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50'
                       }`}
                     >
-                      <div className="text-sm font-medium">{date.label}</div>
+                      <div className="text-xs sm:text-sm font-medium">{date.label}</div>
                     </button>
                   ))}
                 </div>
@@ -359,22 +347,19 @@ export default function BookingSystem() {
 
               {/* Time Selection */}
               {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Valitse Aika</h4>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                <div className="animate-fade-in">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Valitse Aika</h4>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {availableSlots.map((slot) => (
                       <button
                         key={slot.time}
                         onClick={() => setSelectedTime(slot.time)}
                         disabled={!slot.available}
-                        className={`p-2 border rounded-lg transition-all text-sm ${
+                        className={`p-2 sm:p-3 border rounded-lg transition-all text-xs sm:text-sm touch-manipulation ${
                           selectedTime === slot.time
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 scale-105'
                             : slot.available
-                            ? 'border-gray-200 hover:border-emerald-300'
+                            ? 'border-gray-200 hover:border-emerald-300 hover:bg-emerald-50'
                             : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
                         }`}
                       >
@@ -382,34 +367,28 @@ export default function BookingSystem() {
                       </button>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {selectedDate && selectedTime && (
                 <button
                   onClick={handleDateTimeSelect}
-                  className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                  className="w-full bg-emerald-600 text-white py-3 sm:py-4 px-4 rounded-lg hover:bg-emerald-700 transition-all font-medium hover:scale-105 active:scale-95 touch-manipulation"
                 >
                   Jatka Tietojen Täyttöön →
                 </button>
               )}
-            </motion.div>
+            </div>
           )}
 
           {/* Step 3: Customer Information */}
           {currentStep === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
+            <div className="space-y-4 sm:space-y-6 animate-slide-in">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Yhteystiedot</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Yhteystiedot</h3>
                 <button
                   onClick={() => setCurrentStep(2)}
-                  className="text-emerald-600 hover:text-emerald-700 font-medium"
+                  className="text-emerald-600 hover:text-emerald-700 font-medium text-sm sm:text-base"
                 >
                   ← Takaisin
                 </button>
@@ -417,8 +396,8 @@ export default function BookingSystem() {
 
               {/* Booking Summary */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-bold text-gray-900 mb-2">Varauksen Yhteenveto</h4>
-                <div className="space-y-1 text-sm text-gray-700">
+                <h4 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">Varauksen Yhteenveto</h4>
+                <div className="space-y-1 text-xs sm:text-sm text-gray-700">
                   <div className="flex justify-between">
                     <span>Palvelu:</span>
                     <span className="font-medium">{selectedService?.titleFi}</span>
@@ -519,7 +498,7 @@ export default function BookingSystem() {
               <button
                 onClick={handleSubmit}
                 disabled={!bookingData.customerName || !bookingData.customerPhone || !bookingData.customerEmail || isSubmitting}
-                className="w-full bg-emerald-600 text-white py-4 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full bg-emerald-600 text-white py-3 sm:py-4 px-4 rounded-lg hover:bg-emerald-700 transition-all font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center hover:scale-105 active:scale-95 touch-manipulation"
               >
                 {isSubmitting ? (
                   <>
@@ -530,29 +509,24 @@ export default function BookingSystem() {
                   'Vahvista Varaus'
                 )}
               </button>
-            </motion.div>
+            </div>
           )}
 
           {/* Step 4: Confirmation */}
           {currentStep === 4 && (
-            <motion.div
-              key="step4"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center space-y-6"
-            >
+            <div className="text-center space-y-4 sm:space-y-6 animate-scale-in">
               <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-emerald-600" />
               </div>
 
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Varaus Vahvistettu!</h3>
-                <p className="text-gray-600">Kiitos varauksestasi. Lähetimme vahvistuksen sähköpostiisi.</p>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Varaus Vahvistettu!</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Kiitos varauksestasi. Lähetimme vahvistuksen sähköpostiisi.</p>
               </div>
 
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-left">
-                <h4 className="font-bold text-emerald-900 mb-4">Varauksen Tiedot</h4>
-                <div className="space-y-2 text-sm">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 sm:p-6 text-left">
+                <h4 className="font-bold text-emerald-900 mb-4 text-sm sm:text-base">Varauksen Tiedot</h4>
+                <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Palvelu:</span>
                     <span className="font-medium">{selectedService?.titleFi}</span>
@@ -575,7 +549,7 @@ export default function BookingSystem() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start space-x-2">
                   <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-800">
+                  <div className="text-sm text-blue-800 text-left">
                     <p className="font-medium mb-1">Tärkeää:</p>
                     <ul className="space-y-1 text-xs">
                       <li>• Tarkista sähköpostisi vahvistuksesta</li>
@@ -590,24 +564,66 @@ export default function BookingSystem() {
               <div className="flex flex-col space-y-3">
                 <button
                   onClick={() => {
-                    resetBooking();
-                    setIsOpen(false);
+                    resetBooking()
+                    setIsOpen(false)
                   }}
-                  className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                  className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 transition-all font-medium hover:scale-105 active:scale-95 touch-manipulation"
                 >
                   Valmis
                 </button>
                 <button
                   onClick={resetBooking}
-                  className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-all font-medium hover:scale-105 active:scale-95 touch-manipulation"
                 >
                   Tee Uusi Varaus
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
       </div>
-    </motion.div>
-  );
+
+      {/* CSS Animations */}
+      <style jsx global>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes scale-in {
+          from { 
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to { 
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes slide-in {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+        
+        .animate-scale-in {
+          animation: scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .animate-slide-in {
+          animation: slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      `}</style>
+    </>
+  )
 }
