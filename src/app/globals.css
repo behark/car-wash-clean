@@ -5,29 +5,171 @@
 @layer base {
   :root {
     --font-display: 'Inter', system-ui, sans-serif;
+    
+    /* Color variables for future theming */
+    --color-primary: 147 51 234; /* purple-600 */
+    --color-primary-hover: 126 34 206; /* purple-700 */
+    --color-secondary: 59 130 246; /* blue-500 */
   }
 
   html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
+
+  /* Better focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-purple-600;
+  }
+
+  /* Remove focus styles for mouse users */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @layer components {
+  /* Fade In Animation */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
   }
 
+  /* Slide Up Animation */
   .animate-slide-up {
     animation: slideUp 0.8s ease-out;
+  }
+
+  /* Scale In Animation */
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Pulse Animation */
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
 
 @layer utilities {
+  /* Text balance for better typography */
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom scrollbar for Webkit browsers */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-lg;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+/* Selection styles */
+::selection {
+  @apply bg-purple-600 text-white;
+}
+
+::-moz-selection {
+  @apply bg-purple-600 text-white;
 }
