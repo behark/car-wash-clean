@@ -45,13 +45,7 @@ export default function Hero() {
           </span>
         </div>
 
-        {/* Main Headline */}
-        <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-slide-up">
-          <span className="block text-white">Huolellisesti</span>
-          <span className="block bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
-            Kiiltävään Lopputulokseen
-          </span>
-        </h1>
+
 
         {/* Subtitle */}
         <p className="text-xl md:text-2xl lg:text-3xl text-silver-200 mb-4 max-w-4xl mx-auto leading-relaxed animate-slide-up animation-delay-200">
