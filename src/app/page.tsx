@@ -1,8 +1,13 @@
 import Link from 'next/link'
-import Image from 'next/image'
-import { Star, CheckCircle, MapPin, Clock, Phone, Mail, Shield, Award } from 'lucide-react'
-import Header from '../components/Header'
 import Footer from '../components/Footer'
+import Header from '../components/Header'
+import Hero from '../components/Hero'
+import SEO from '../components/SEO'
+import ServicesGrid from '../components/ServicesGrid'
+import BeforeAfterGallery from '../components/BeforeAfterGallery'
+import TestimonialForm from '../components/TestimonialForm'
+import TestimonialsList from '../components/TestimonialsList'
+import FloatingContact from '../components/FloatingContact'
 import { siteConfig } from '../lib/siteConfig'
 import { getServices, getTestimonials } from '../lib/sanity'
 import { mockServices, mockTestimonials } from '../lib/mockData'
@@ -30,345 +35,185 @@ export default async function HomePage() {
 
   return (
     <>
+      <SEO
+        title={siteConfig.tagline}
+        description={siteConfig.tagline}
+        image={siteConfig.heroImage}
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            'name': siteConfig.name,
+            'image': siteConfig.heroImage,
+            'telephone': siteConfig.phone.tel,
+            'address': {
+              '@type': 'PostalAddress',
+              'streetAddress': siteConfig.address.street,
+              'addressLocality': siteConfig.address.city,
+              'postalCode': siteConfig.address.postalCode,
+              'addressCountry': siteConfig.address.country
+            },
+            'url': siteConfig.siteUrl,
+            'openingHoursSpecification': siteConfig.hours.filter(h => h.value && h.value !== 'Suljettu').map(h => ({
+              '@type': 'OpeningHoursSpecification',
+              'dayOfWeek': 'Monday',
+              'opens': h.value.split('–')[0],
+              'closes': h.value.split('–')[1]
+            }))
+          }
+        ]}
+      />
       <Header />
+      <Hero />
+      <main className="bg-slate-50">
+        {/* Trust Badges Section */}
+        <section className="py-12 bg-white border-b border-silver-100">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {siteConfig.certifications.map((cert, index) => (
+                <div key={index} className="flex flex-col items-center space-y-2 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
+                  <div className="w-12 h-12 bg-gold-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">{cert}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-navy-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/hero-car-wash-professional.jpg')] bg-cover bg-center opacity-90"></div>
-        <div className="absolute inset-0 bg-black/30"></div>
-
-        <div className="relative mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-          <div className="text-center">
-            <div className="inline-flex items-center bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-6 py-2 mb-8">
-              <span className="text-purple-300 text-sm font-medium">
-                🚗 Ammattitaitoista autopesupalvelua
-              </span>
+        {/* Services Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16 animate-fade-in">
+              <div className="inline-flex items-center bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                🚗 Laadukas palvelu
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-navy-900 mb-6">
+                Autopesupalvelumme
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Tarjoamme kattavan valikoiman laadukkaita autopesupalveluita, jotka antavat autollesi ansaitsemansa huippuluokan hoidon ja suojan.
+              </p>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              {siteConfig.tagline}
-            </h1>
+            <ServicesGrid services={services} />
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-silver-200">
-              {siteConfig.subtitle} - Laadukas palvelu, luotettava tulokset.
-            </p>
-
-            {/* Opening Hours & Contact in Hero */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-silver-200">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-gold-400" />
-                <span className="text-sm font-medium">Ma-Pe 8:00-18:00 | La 9:00-16:00</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="w-5 h-5 text-gold-400" />
-                <span className="text-sm font-medium">+358 40 123 4567</span>
-              </div>
-            </div>
-
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/booking"
-                className="rounded-md bg-gold-600 px-6 py-3 text-sm font-semibold text-navy-900 shadow-sm hover:bg-gold-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-600 transition-colors"
-              >
-                Varaa aika nyt
-              </Link>
+            <div className="text-center mt-12 animate-fade-in">
               <Link
                 href="/services"
-                className="text-sm font-semibold leading-6 text-white hover:text-gold-300 transition-colors"
+                className="inline-flex items-center bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl group"
               >
-                Katso palvelut <span aria-hidden="true">→</span>
+                Tutustu palveluihimme
+                <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Before/After Gallery Section */}
+        <BeforeAfterGallery />
+
+        {/* Testimonials Section */}
+        <section className="py-20 bg-slate-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16 animate-fade-in">
+              <div className="inline-flex items-center bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                ⭐ Asiakaskokemukset
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-navy-900 mb-6">
+                Mitä asiakkaamme sanovat
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Yli {siteConfig.features.customers} tyytyväistä asiakasta - lue heidän kokemuksiaan palvelustamme.
+              </p>
+            </div>
+
+            <TestimonialsList testimonials={testimonials} />
+
+            <div className="text-center mt-12 animate-fade-in">
+              <Link
+                href="/testimonials"
+                className="inline-flex items-center text-gold-600 hover:text-gold-700 font-semibold transition-colors group"
+              >
+                Lue lisää arvosteluja
+                <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
               </Link>
             </div>
 
-            {/* Trust indicators */}
-            <div className="mt-16 grid grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-gold-400">{siteConfig.features.rating}</div>
-                <div className="text-sm text-silver-300">⭐ Keskiarvo</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gold-400">{siteConfig.features.customers}</div>
-                <div className="text-sm text-silver-300">Tyytyväistä asiakasta</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-gold-400">{siteConfig.features.years}</div>
-                <div className="text-sm text-silver-300">Vuotta kokemusta</div>
-              </div>
+            <div className="max-w-2xl mx-auto mt-16">
+              <TestimonialForm />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Certifications Section */}
-      <section className="py-12 bg-white border-b border-silver-100">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {siteConfig.certifications.map((cert, index) => (
-              <div key={index} className="flex flex-col items-center space-y-2 animate-fade-in" style={{animationDelay: `${index * 100}ms`}}>
-                <div className="w-12 h-12 bg-gold-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-gold-600" />
-                </div>
-                <span className="text-sm font-medium text-slate-700">{cert}</span>
+        {/* Premium CTA Section */}
+        <section className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700"></div>
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center opacity-15"></div>
+
+          <div className="relative container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto animate-fade-in">
+              <div className="inline-flex items-center bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-6 py-2 mb-8">
+                <span className="text-purple-300 text-sm font-medium">
+                  🚗 Varaa aika nyt ja säästä aikaa
+                </span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Services Section */}
-      <section className="py-20 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              🚗 Laadukas palvelu
-            </div>
-            <h2 className="text-4xl font-bold tracking-tight text-navy-900 sm:text-5xl">
-              Autopesupalvelumme
-            </h2>
-            <p className="mt-6 text-xl leading-8 text-slate-600 max-w-3xl mx-auto">
-              Tarjoamme kattavan valikoiman laadukkaita autopesupalveluita
-            </p>
-          </div>
+              <h2 className="font-display text-4xl md:text-6xl font-bold text-white mb-6">
+                Valmis antamaan autollesi
+                <span className="block bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
+                  ansaitsemansa hoidon?
+                </span>
+              </h2>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {services.map((service) => (
-              <div key={service._id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-slate-100 group hover:-translate-y-1">
-                {/* Service Icon */}
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">🚗</span>
-                  </div>
-                </div>
+              <p className="text-xl md:text-2xl text-silver-200 mb-8 max-w-3xl mx-auto">
+                Helppo online-varaus, laadukas palvelu, ja {siteConfig.features.guarantee}.
+              </p>
 
-                {/* Service Title & Price */}
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-navy-900 mb-2">{service.titleFi}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">Alkaen</span>
-                    <span className="text-2xl font-bold text-purple-600">{service.price}€</span>
-                  </div>
-                </div>
-
-                {/* Service Description */}
-                <p className="text-slate-600 text-sm mb-4 line-clamp-3">{service.descriptionFi}</p>
-
-                {/* Service Details */}
-                <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
-                  <span>👥 {service.capacity} paikkaa</span>
-                </div>
-
-                {/* Book Button */}
-                <Link href="/booking" className="block w-full">
-                  <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-4 rounded-xl transition-colors text-sm">
-                    Varaa nyt
-                  </button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  href="/booking"
+                  className="group relative bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-navy-900 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                >
+                  <span className="relative z-10">Varaa aika nyt</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gold-400 to-gold-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </Link>
 
-                {/* Satisfaction Badge */}
-                <div className="flex items-center justify-center mt-3 text-xs text-slate-500">
-                  <span>✅ 100% Tyytyväisyystakuu</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link
-              href="/services"
-              className="inline-flex items-center bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              Tutustu kaikkiin palveluihimme
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              ⭐ Asiakaskokemukset
-            </div>
-            <h2 className="text-4xl font-bold tracking-tight text-navy-900 sm:text-5xl">
-              Mitä asiakkaamme sanovat
-            </h2>
-            <p className="mt-6 text-xl leading-8 text-slate-600">
-              Yli {siteConfig.features.customers} tyytyväistä asiakasta
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial._id} className="bg-slate-50 rounded-xl p-6">
-                <div className="flex items-center mb-4">
-                  <div className="flex text-gold-400">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-slate-700 mb-4">"{testimonial.contentFi}"</p>
-                <p className="text-sm font-medium text-slate-900">- {testimonial.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Guarantee Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              🛡️ Takuu
-            </div>
-            <h2 className="text-4xl font-bold tracking-tight text-navy-900 sm:text-5xl">
-              100% Tyytyväisyystakuu
-            </h2>
-            <p className="mt-6 text-xl leading-8 text-slate-600 max-w-3xl mx-auto">
-              Takaamme täydellisen tuloksen jokaisessa pesossa. Jos et ole tyytyväinen, korjaamme sen ilmaiseksi.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-navy-900 mb-2">Laatutakuu</h3>
-              <p className="text-slate-600">Ammattilaisten suorittama pesu laadukkailla tuotteilla</p>
-            </div>
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-navy-900 mb-2">Kokemusta</h3>
-              <p className="text-slate-600">{siteConfig.features.years} vuotta autopesualan kokemusta</p>
-            </div>
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-navy-900 mb-2">Ympäristöystävällinen</h3>
-              <p className="text-slate-600">Käytämme vain ympäristöystävällisiä pesuaineita</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact & Location Section */}
-      <section className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              📍 Yhteystiedot
-            </div>
-            <h2 className="text-4xl font-bold tracking-tight text-navy-900 sm:text-5xl">
-              Löydä meidät
-            </h2>
-            <p className="mt-6 text-xl leading-8 text-slate-600">
-              Kätevästi sijaitseva autopesula helpoilla yhteyksillä
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-navy-900 mb-1">Osoite</h3>
-                  <p className="text-slate-600">{siteConfig.name}<br />{siteConfig.address.street}<br />{siteConfig.address.postalCode} {siteConfig.address.city}</p>
-                </div>
+                <Link
+                  href="/services"
+                  className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 hover:border-gold-400/50"
+                >
+                  Katso hinnat
+                </Link>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-green-600" />
+              <div className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-white/20">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gold-400 mb-2">{siteConfig.features.rating}</div>
+                  <div className="text-sm text-silver-300">⭐ Keskiarvo</div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-navy-900 mb-1">Puhelin</h3>
-                  <p className="text-slate-600">+358 40 123 4567</p>
-                  <p className="text-sm text-slate-500">Ma-Pe 8:00-18:00</p>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gold-400 mb-2">{siteConfig.features.customers}</div>
+                  <div className="text-sm text-silver-300">Tyytyväistä asiakasta</div>
                 </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-navy-900 mb-1">Sähköposti</h3>
-                  <p className="text-slate-600">info@autopesclean.fi</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gold-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-gold-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-navy-900 mb-1">Aukioloajat</h3>
-                  <div className="text-slate-600 space-y-1">
-                    <p>Maanantai - Perjantai: 8:00 - 18:00</p>
-                    <p>Lauantai: 9:00 - 16:00</p>
-                    <p>Sunnuntai: 10:00 - 15:00</p>
-                  </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gold-400 mb-2">{siteConfig.features.years}</div>
+                  <div className="text-sm text-silver-300">Vuotta kokemusta</div>
                 </div>
               </div>
             </div>
-
-            {/* Map Placeholder */}
-            <div className="bg-slate-100 rounded-xl p-8 flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-600 mb-2">Kartta</h3>
-                <p className="text-slate-500">Google Maps integrointi</p>
-                <p className="text-sm text-slate-400 mt-2">Teollisuuskatu 12, Helsinki</p>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center opacity-15"></div>
-
-        <div className="relative mx-auto max-w-7xl px-6 text-center lg:px-8">
-          <h2 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Valmis antamaan autollesi
-            <span className="block bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
-              ansaitsemansa hoidon?
-            </span>
-          </h2>
-
-          <p className="mx-auto mt-6 max-w-2xl text-xl leading-8 text-silver-200">
-            Helppo online-varaus, laadukas palvelu, ja {siteConfig.features.guarantee}.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/booking"
-              className="rounded-md bg-gold-600 px-6 py-3 text-lg font-semibold text-navy-900 shadow-sm hover:bg-gold-500 transition-colors"
-            >
-              Varaa aika nyt
-            </Link>
-            <Link
-              href="/services"
-              className="rounded-md bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white font-semibold px-6 py-3 text-lg transition-all"
-            >
-              Katso hinnat
-            </Link>
-          </div>
-        </div>
-      </section>
-
+        </section>
+      </main>
       <Footer />
+      <FloatingContact />
     </>
   )
 }
