@@ -4,215 +4,200 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { siteConfig } from '@/lib/siteConfig'
-import { Check, Star, Sparkles, Shield, Droplets, Car, Zap, Award } from 'lucide-react'
+import { Check, Star, Sparkles, Shield, Droplets, Car, Zap, Award, Wrench } from 'lucide-react'
 import Link from 'next/link'
 
-// Services data with detailed information
+// REAL Services data from your business
 const services = [
   {
     id: 1,
-    category: 'Peruspalvelut',
+    category: 'Autopesut',
     items: [
       {
-        name: 'Peruspesu',
+        name: 'Käsinpesu',
         price: '25€',
-        description: 'Ulkopuolinen pesu painepesurin ja shampoon avulla',
+        description: 'Huolellinen käsinpesu, joka palauttaa autosi pinnan raikkauden',
         features: [
           'Koko auton ulkopinta',
           'Renkaat ja vanteet',
           'Ikkunat ja peilit',
+          'Ammattitaitoinen käsityö',
           'Nopea ja tehokas'
         ],
         popular: false,
         icon: Car
       },
       {
-        name: 'Premium Pesu',
-        price: '45€',
-        description: 'Kattava sisä- ja ulkopuhdistus',
+        name: 'Käsinpesu + Pikavaha',
+        price: '30€',
+        description: 'Kevyt vaha antaa upean kiillon ja suojaa autoasi heti pesun jälkeen',
         features: [
-          'Kaikki peruspesussa',
-          'Sisäpuhdistus',
-          'Mattien imurointi',
-          'Kojelaudan pyyhintä',
-          'Ovien sisäpuolet'
+          'Kaikki käsinpesussa',
+          'Nopea vahakäsittely',
+          'Loistava kiilto',
+          'Pintasuoja',
+          'Helpottaa seuraavaa pesua'
+        ],
+        popular: false,
+        icon: Sparkles
+      },
+      {
+        name: 'Käsinpesu + Sisäpuhdistus',
+        price: '55€',
+        description: 'Kokonaisvaltainen puhdistus: matot, imurointi, ikkunat ja pölyjen poisto',
+        features: [
+          'Ulkopesu',
+          'Mattojen imurointi',
+          'Ikkunoiden puhdistus',
+          'Pölyjen poisto',
+          'Kokonaisvaltainen siisteys'
         ],
         popular: true,
         icon: Sparkles
       },
       {
-        name: 'Express Pesu',
-        price: '35€',
-        description: 'Nopea mutta tehokas kokonaispuhdistus',
+        name: 'Käsinpesu + Normaalivaha',
+        price: '70€',
+        description: 'Vahapinnoite, joka säilyttää kiillon ja suojan jopa 2-3 kuukauden ajan',
         features: [
-          'Ulkopesu',
-          'Nopea sisustuksen imurointi',
-          'Ikkunat',
-          'Täydellinen kiireisille'
-        ],
-        popular: false,
-        icon: Zap
-      }
-    ]
-  },
-  {
-    id: 2,
-    category: 'Erikoispalvelut',
-    items: [
-      {
-        name: 'Vahapesu',
-        price: '65€',
-        description: 'Ulkopesu + vahan levitys ja kiillotus',
-        features: [
-          'Perusteellinen pesu',
-          'Premium vaha',
-          'Käsin levitys',
-          'Pitkäkestoinen suoja',
-          'Loistava kiilto'
+          'Perusteellinen ulkopesu',
+          'Kestävä vahakäsittely',
+          'Suoja 2-3 kuukautta',
+          'Upea kiilto',
+          'UV-suoja',
+          'Helpottaa pesua'
         ],
         popular: true,
         icon: Star
       },
       {
-        name: 'Keraamisuojaus',
-        price: '199€',
-        description: 'Huippuluokan keraamisuojaus auton pinnalle',
+        name: 'Käsinpesu + Kovavaha',
+        price: '110€',
+        description: 'Pitkäkestoinen 6 kk suoja ja upea kiilto kovavahauksella',
         features: [
-          'Pitkäkestoinen suoja (1-2 vuotta)',
-          'Nanokeraami',
-          'Vesihylkivä pinta',
-          'UV-suoja',
-          'Helppo puhdistettavuus',
-          'Takuu'
+          'Premium ulkopesu',
+          'Kovavahakäsittely',
+          'Suoja 6 kuukautta',
+          'Poikkeuksellinen kiilto',
+          'Maksimaalinen suoja',
+          'Paras valinta talvelle'
         ],
         popular: true,
         icon: Shield
       },
       {
-        name: 'Sisäpuhdistus Pro',
-        price: '85€',
-        description: 'Syvällinen sisustuksen puhdistus ja hoito',
+        name: 'Maalipinnan Kiillotus',
+        price: 'alk. 350€',
+        description: '3-vaihe kiillotus sekä käsinvahaus',
         features: [
-          'Perusteellinen imurointi',
-          'Verhoilun pesu',
-          'Ovien ja kojelaudan puhdistus',
-          'Hajunpoisto',
-          'Muovien hoito',
-          'Nahkaistuimien hoito'
+          '3-vaiheen kiillotusprosessi',
+          'Naarmujen poisto',
+          'Käsinvahaus',
+          'Henkilöauto 350€',
+          'Maasturi 400€',
+          'Pakettiauto 450€',
+          'Ammattitaitoinen työ'
+        ],
+        popular: true,
+        icon: Award
+      }
+    ]
+  },
+  {
+    id: 2,
+    category: 'Renkaat',
+    items: [
+      {
+        name: 'Renkaiden Vaihto',
+        price: '20€',
+        description: 'Turvallisuutta ja varmuutta ajoon – renkaiden allevaihto ja paineiden tarkistus',
+        features: [
+          'Nopea vaihto',
+          'Paineiden tarkistus',
+          'Muttereiden kiristys',
+          'Ammattitaitoinen asennus',
+          'Turvallinen ajo'
         ],
         popular: false,
-        icon: Sparkles
+        icon: Wrench
+      },
+      {
+        name: 'Renkaiden Pesu',
+        price: '10€',
+        description: 'Puhtaat renkaat ja vanteet sekä sisältä että ulkoa',
+        features: [
+          'Renkaiden pesu',
+          'Vanteiden puhdistus',
+          'Sisä- ja ulkopuoli',
+          'Jarrupölyn poisto',
+          'Upea lopputulos'
+        ],
+        popular: false,
+        icon: Car
+      },
+      {
+        name: 'Rengashotelli',
+        price: '69€',
+        description: 'Helppoutta ja tilansäästöä – kausisäilytys keväästä syksyyn tai syksystä kevääseen',
+        features: [
+          'Turvallinen säilytys',
+          'Optimaaliset olosuhteet',
+          'Kausi-säilytys (6kk)',
+          'Tilansäästö kotona',
+          'Huolellinen käsittely'
+        ],
+        popular: false,
+        icon: Shield
       }
     ]
   },
   {
     id: 3,
-    category: 'Premium Palvelut',
+    category: 'Lisäpalvelut',
     items: [
       {
-        name: 'Premium Detail',
-        price: '149€',
-        description: 'Täydellinen yksityiskohtainen puhdistus ja hoito',
+        name: 'Moottorin Pesu',
+        price: '20€',
+        description: 'Puhdas moottoritila – aina asiakkaan omalla vastuulla',
         features: [
-          'Täydellinen ulko- ja sisäpuhdistus',
-          'Kiillotus',
-          'Vahakäsittely',
           'Moottoritilan puhdistus',
-          'Ovien ja tankojen puhdistus',
-          'Täydellinen lopputulos'
-        ],
-        popular: true,
-        icon: Award
-      },
-      {
-        name: 'Moottoritilan Pesu',
-        price: '55€',
-        description: 'Ammattitasoinen moottoritilan puhdistus',
-        features: [
-          'Turvallinen höyrypuhdistus',
           'Rasvanpoisto',
-          'Muovien suojaus',
-          'Yksityiskohtainen työ',
-          'Näyttää kuin uudelta'
+          'Asiakkaan omalla vastuulla',
+          'Ammattitaitoinen käsittely',
+          'Siisti moottoritila'
         ],
         popular: false,
         icon: Droplets
       },
       {
-        name: 'Vanteiden Kiillotus',
-        price: '45€',
-        description: 'Erikoiskäsittely vanteille',
+        name: 'Hajunpoisto Otsonoinnilla',
+        price: '50€',
+        description: 'Raikas sisäilma – tehokas otsonointi poistaa epämiellyttävät hajut',
         features: [
-          'Perusteellinen puhdistus',
-          'Jarrupölyn poisto',
-          'Kiillotus',
-          'Suojausaine',
-          'Loistava lopputulos'
-        ],
-        popular: false,
-        icon: Star
-      },
-      {
-        name: 'Nahkaistuimien Hoito',
-        price: '75€',
-        description: 'Erikoishoito nahkapinnoille',
-        features: [
-          'Perusteellinen puhdistus',
-          'Nahkaöljy',
-          'UV-suoja',
-          'Säilyttää nahan joustavuuden',
-          'Pitkäaikainen suoja'
-        ],
-        popular: false,
-        icon: Sparkles
-      }
-    ]
-  },
-  {
-    id: 4,
-    category: 'Lisäpalvelut',
-    items: [
-      {
-        name: 'Hajunpoisto Ozonilla',
-        price: '45€',
-        description: 'Tehokas hajunpoisto ozonisaattorilla',
-        features: [
+          'Tehokas otsonointi',
           'Poistaa tupakan hajun',
           'Poistaa eläinten hajut',
           'Bakteerien tuhoaminen',
-          'Raikas lopputulos',
+          'Raikas sisäilma',
           'Turvallinen menetelmä'
         ],
         popular: false,
         icon: Droplets
       },
       {
-        name: 'Lasinpinnoite',
-        price: '35€',
-        description: 'Vesihylkivä pinnoite ikkunoille',
+        name: 'Penkkien Pesu',
+        price: '100€',
+        description: 'Syväpuhdistetut penkit – kemiallinen märkäpesu palauttaa raikkauden',
         features: [
-          'Parantaa näkyvyyttä',
-          'Vesi valuu pois',
-          'Helpottaa talvipuhdistusta',
-          'Kesto 6-12 kuukautta',
-          'Turvallinen ajolle'
+          'Kemiallinen märkäpesu',
+          'Syväpuhdistus',
+          'Tahrojen poisto',
+          'Ammattilaistuotteet',
+          'Palauttaa raikkauden',
+          'Näyttää uudelta'
         ],
         popular: false,
-        icon: Shield
-      },
-      {
-        name: 'Koirankarvojen Poisto',
-        price: '30€',
-        description: 'Erikoispuhdistus lemmikkieläinten jäljiltä',
-        features: [
-          'Tehokas karvojen poisto',
-          'Verhoilun imurointi',
-          'Hajunpoisto',
-          'Erikoistyökalut',
-          'Perusteellinen lopputulos'
-        ],
-        popular: false,
-        icon: Car
+        icon: Sparkles
       }
     ]
   }
@@ -390,8 +375,6 @@ export default function ServicesPage() {
             ))}
           </div>
         </section>
-
-        {/* Add-ons Section - Removed since all services are now in main categories */}
 
         {/* CTA Section */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-600 to-blue-600 text-white">
