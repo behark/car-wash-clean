@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { Car, Sparkles } from 'lucide-react';
+import { Car, Sparkles, AlertCircle } from 'lucide-react';
+
+type ImageType = 'before' | 'after' | 'gallery' | 'service';
 
 interface VehicleImageWithFallbackProps {
   src: string;
@@ -17,12 +19,16 @@ interface VehicleImageWithFallbackProps {
   showPlaceholderIcon?: boolean;
   onLoad?: () => void;
   onError?: () => void;
-  type?: 'before' | 'after' | 'gallery' | 'service';
+  type?: ImageType;
+  /** Enable automatic retry for external images */
+  enableRetry?: boolean;
+  /** Maximum retry attempts */
+  maxRetries?: number;
 }
 
 /**
  * Vehicle Image Component with car wash specific fallback handling
- * Optimized for before/after images and service gallery
+ * Optimized for before/after images and service gallery with automatic retry
  */
 export default function VehicleImageWithFallback({
   src,
@@ -37,12 +43,26 @@ export default function VehicleImageWithFallback({
   showPlaceholderIcon = true,
   onLoad,
   onError,
-  type = 'gallery'
+  type = 'gallery',
+  enableRetry = true,
+  maxRetries = 2
 }: VehicleImageWithFallbackProps) {
   const [imageSrc, setImageSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Reset state when src changes
+  useEffect(() => {
+    setImageSrc(src);
+    setHasError(false);
+    setIsLoading(true);
+    setRetryCount(0);
+  }, [src]);
+
+  const isExternalImage = useCallback((url: string) => {
+    return url.startsWith('http') || url.includes('unsplash.com') || url.includes('images.');
+  }, []);
 
   const handleLoad = useCallback(() => {
     setIsLoading(false);
@@ -51,75 +71,85 @@ export default function VehicleImageWithFallback({
   }, [onLoad]);
 
   const handleError = useCallback(() => {
-    // Try to retry once for external images
-    if (retryCount === 0 && (src.includes('unsplash.com') || src.startsWith('http'))) {
-      setRetryCount(1);
-      // Force reload by adding timestamp
-      setImageSrc(`${src}${src.includes('?') ? '&' : '?'}retry=${Date.now()}`);
+    console.error(`Image failed to load: ${imageSrc}, retry count: ${retryCount}`);
+
+    // Try to retry for external images
+    if (enableRetry && retryCount < maxRetries && isExternalImage(src)) {
+      console.log(`Retrying image load (attempt ${retryCount + 1}/${maxRetries})`);
+      setRetryCount(prev => prev + 1);
+      
+      // Wait a bit before retrying
+      setTimeout(() => {
+        // Force reload by updating state (Next.js Image will re-fetch)
+        setImageSrc(src);
+      }, 500 * (retryCount + 1)); // Exponential backoff
+      
       return;
     }
 
+    // All retries exhausted or retry disabled, use fallback
     if (!hasError && imageSrc !== fallbackSrc) {
+      console.log(`Using fallback image: ${fallbackSrc}`);
       setImageSrc(fallbackSrc);
       setHasError(true);
     }
+    
     setIsLoading(false);
     onError?.();
-  }, [hasError, imageSrc, fallbackSrc, onError, retryCount, src]);
+  }, [hasError, imageSrc, fallbackSrc, onError, retryCount, src, enableRetry, maxRetries, isExternalImage]);
 
   const imageProps = fill
     ? { fill: true, sizes }
     : { width: width || 800, height: height || 600 };
 
   const getPlaceholderContent = () => {
-    switch (type) {
-      case 'before':
-        return (
-          <div className="text-center text-gray-400">
-            <Car className="mx-auto h-16 w-16 mb-2 opacity-60" />
-            <p className="text-sm font-medium">Before Image</p>
-            <p className="text-xs">Ennen kuvaa</p>
+    const placeholders: Record<ImageType, JSX.Element> = {
+      before: (
+        <div className="text-center text-gray-400">
+          <Car className="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-2 opacity-60" />
+          <p className="text-xs sm:text-sm font-medium">Ennen</p>
+          <p className="text-xs opacity-60">Before</p>
+        </div>
+      ),
+      after: (
+        <div className="text-center text-gray-400">
+          <div className="relative inline-block">
+            <Car className="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-2" />
+            <Sparkles className="absolute -top-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />
           </div>
-        );
-      case 'after':
-        return (
-          <div className="text-center text-gray-400">
-            <div className="relative">
-              <Car className="mx-auto h-16 w-16 mb-2" />
-              <Sparkles className="absolute -top-1 -right-1 h-6 w-6 text-emerald-400" />
-            </div>
-            <p className="text-sm font-medium">After Image</p>
-            <p className="text-xs text-emerald-600">Jälkeen kuvaa</p>
+          <p className="text-xs sm:text-sm font-medium text-emerald-600">Jälkeen</p>
+          <p className="text-xs opacity-60">After</p>
+        </div>
+      ),
+      service: (
+        <div className="text-center text-gray-400">
+          <div className="relative inline-block">
+            <Car className="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-2" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full opacity-20 blur-sm" />
           </div>
-        );
-      case 'service':
-        return (
-          <div className="text-center text-gray-400">
-            <div className="relative">
-              <Car className="mx-auto h-16 w-16 mb-2" />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-emerald-400 rounded-full opacity-20" />
-            </div>
-            <p className="text-sm font-medium">Service Image</p>
-            <p className="text-xs">Palvelukuva</p>
-          </div>
-        );
-      default:
-        return (
-          <div className="text-center text-gray-400">
-            <Car className="mx-auto h-16 w-16 mb-2" />
-            <p className="text-sm">Vehicle Image</p>
-          </div>
-        );
-    }
+          <p className="text-xs sm:text-sm font-medium">Palvelukuva</p>
+          <p className="text-xs opacity-60">Service</p>
+        </div>
+      ),
+      gallery: (
+        <div className="text-center text-gray-400">
+          <Car className="mx-auto h-12 sm:h-16 w-12 sm:w-16 mb-2" />
+          <p className="text-xs sm:text-sm">Galleriakuva</p>
+          <p className="text-xs opacity-60">Gallery Image</p>
+        </div>
+      )
+    };
+
+    return placeholders[type];
   };
 
   return (
     <div className={`relative overflow-hidden bg-gray-100 ${className}`}>
       {/* Loading state */}
       {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse flex items-center justify-center">
           <div className="text-gray-400">
-            <Car className="h-12 w-12 animate-bounce" />
+            <Car className="h-10 w-10 sm:h-12 sm:w-12 animate-bounce" />
           </div>
         </div>
       )}
@@ -135,39 +165,88 @@ export default function VehicleImageWithFallback({
         priority={priority}
         onLoad={handleLoad}
         onError={handleError}
+        unoptimized={isExternalImage(imageSrc)} // Don't optimize external images
       />
 
       {/* Error state with contextual icon */}
       {hasError && showPlaceholderIcon && imageSrc === fallbackSrc && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
           {getPlaceholderContent()}
         </div>
       )}
 
-      {/* Loading overlay for external images */}
-      {isLoading && retryCount > 0 && (
-        <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-          Retrying...
+      {/* Retry indicator */}
+      {isLoading && retryCount > 0 && retryCount < maxRetries && (
+        <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+          <AlertCircle className="w-3 h-3" />
+          <span>Ladataan... ({retryCount}/{maxRetries})</span>
+        </div>
+      )}
+
+      {/* Failed after retries indicator */}
+      {hasError && retryCount >= maxRetries && (
+        <div className="absolute bottom-2 left-2 right-2 bg-red-100 text-red-800 text-xs px-3 py-1 rounded-full text-center shadow-sm">
+          Kuvan lataus epäonnistui
         </div>
       )}
     </div>
   );
 }
 
-// Utility for handling before/after image pairs
-export const createBeforeAfterImagePair = (beforeSrc: string, afterSrc: string) => ({
-  before: beforeSrc || '/images/placeholder-vehicle.svg',
-  after: afterSrc || '/images/placeholder-vehicle.svg'
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Create a before/after image pair with fallbacks
+ */
+export const createBeforeAfterImagePair = (
+  beforeSrc: string, 
+  afterSrc: string,
+  fallback: string = '/images/placeholder-vehicle.svg'
+) => ({
+  before: beforeSrc || fallback,
+  after: afterSrc || fallback
 });
 
-// Utility for validating external image URLs
+/**
+ * Validate if a URL is a valid image URL
+ */
 export const isValidImageUrl = (url: string): boolean => {
-  if (!url) return false;
+  if (!url || typeof url !== 'string') return false;
 
-  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'];
+  const validDomains = ['unsplash.com', 'images.', 'img.'];
+
   const hasValidExtension = validExtensions.some(ext =>
     url.toLowerCase().includes(ext)
   );
 
-  return hasValidExtension || url.includes('unsplash.com') || url.includes('images.');
+  const hasValidDomain = validDomains.some(domain =>
+    url.toLowerCase().includes(domain)
+  );
+
+  return hasValidExtension || hasValidDomain;
+};
+
+/**
+ * Get optimized image sizes based on viewport
+ */
+export const getImageSizes = (type: ImageType): string => {
+  const sizeConfigs: Record<ImageType, string> = {
+    before: '(max-width: 768px) 50vw, (max-width: 1024px) 40vw, 30vw',
+    after: '(max-width: 768px) 50vw, (max-width: 1024px) 40vw, 30vw',
+    service: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    gallery: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+  };
+
+  return sizeConfigs[type];
+};
+
+/**
+ * Check if image should be lazy loaded based on position
+ */
+export const shouldPrioritize = (index: number, viewportImages: number = 6): boolean => {
+  // Prioritize first viewport of images
+  return index < viewportImages;
 };
