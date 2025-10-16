@@ -58,8 +58,8 @@ export default function ServicesGrid({ services }: { services: Service[] }) {
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
       {displayServices.map((service, index) => {
         const serviceId = ('_id' in service && service._id) || ('id' in service && service.id) || index
-        const price = service.price || (service.priceCents ? service.priceCents / 100 : 0)
-        const priceCents = service.priceCents || (service.price ? service.price * 100 : 0)
+        const price = ('price' in service && service.price) || ('priceCents' in service && service.priceCents ? service.priceCents / 100 : 0)
+        const priceCents = ('priceCents' in service && service.priceCents) || ('price' in service && service.price ? service.price * 100 : 0)priceCents = service.priceCents || (service.price ? service.price * 100 : 0)
         
         return (
           <div
