@@ -12,7 +12,7 @@ import { getServices, getTestimonials } from '../lib/sanity'
 import { mockServices, mockTestimonials } from '../lib/mockData'
 import { Star, CheckCircle, Sparkles } from 'lucide-react'
 
-// Lazy load heavy components
+// Lazy load heavy components (Next.js 15 compatible)
 const BeforeAfterGallery = dynamic(() => import('../components/BeforeAfterGallery'), {
   loading: () => (
     <div className="py-16 bg-gradient-to-br from-slate-50 to-purple-50">
@@ -23,8 +23,8 @@ const BeforeAfterGallery = dynamic(() => import('../components/BeforeAfterGaller
         </div>
       </div>
     </div>
-  ),
-  ssr: false
+  )
+  // Note: ssr: false removed - not compatible with Next.js 15 Server Components
 })
 
 // SEO Metadata
