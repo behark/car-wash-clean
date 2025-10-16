@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import {
   Phone,
   Mail,
@@ -17,23 +18,25 @@ export default function FloatingContactWidget() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isBusinessOpen, setIsBusinessOpen] = useState(false)
   const [timeUntilChange, setTimeUntilChange] = useState('')
+  const pathname = usePathname()
+
+  // Hide widget on booking page
+  const shouldHide = pathname === '/booking'
 
   // Check business hours
   useEffect(() => {
     const checkBusinessHours = () => {
       const now = new Date()
       const currentHour = now.getHours()
-      const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const currentDay = now.getDay()
 
       let isOpen = false
       let nextChange = ''
 
       if (currentDay === 0) {
-        // Sunday - Closed
         isOpen = false
         nextChange = 'Avautuu maanantaina klo 8:00'
       } else if (currentDay === 6) {
-        // Saturday
         if (currentHour >= 10 && currentHour < 16) {
           isOpen = true
           nextChange = `Sulkeutuu klo 16:00`
@@ -42,7 +45,6 @@ export default function FloatingContactWidget() {
           nextChange = currentHour < 10 ? 'Avautuu klo 10:00' : 'Avautuu maanantaina klo 8:00'
         }
       } else {
-        // Monday - Friday
         if (currentHour >= 8 && currentHour < 18) {
           isOpen = true
           nextChange = `Sulkeutuu klo 18:00`
@@ -57,7 +59,7 @@ export default function FloatingContactWidget() {
     }
 
     checkBusinessHours()
-    const interval = setInterval(checkBusinessHours, 60000) // Check every minute
+    const interval = setInterval(checkBusinessHours, 60000)
 
     return () => clearInterval(interval)
   }, [])
@@ -121,6 +123,11 @@ export default function FloatingContactWidget() {
       hoverColor: 'hover:bg-red-600'
     }
   ]
+
+  // Don't render on booking page
+  if (shouldHide) {
+    return null
+  }
 
   return (
     <div className="floating-widget fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
@@ -237,7 +244,7 @@ export default function FloatingContactWidget() {
           )}
         </div>
 
-        {/* Desktop Tooltip - Hidden on Mobile */}
+        {/* Desktop Tooltip */}
         {!isExpanded && (
           <div className="hidden sm:block absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
             {isBusinessOpen ? 'Varaa aika - Olemme auki!' : 'Ota yhteyttä'}
@@ -246,7 +253,6 @@ export default function FloatingContactWidget() {
         )}
       </button>
 
-      {/* Screen Reader Support */}
       <span className="sr-only">
         Ota yhteyttä {siteConfig.name} - {isBusinessOpen ? 'Tällä hetkellä auki' : 'Tällä hetkellä suljettu'}.
       </span>
