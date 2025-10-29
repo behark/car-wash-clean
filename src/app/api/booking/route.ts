@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePhoneNumber, validateEmail, validateName } from '@/lib/validation';
 import { sendBookingConfirmationEmail, sendBusinessNotificationEmail } from '@/lib/email';
+import bookingDb from '@/lib/db/bookings';
 import twilio from 'twilio';
 
 interface BookingData {
@@ -69,8 +70,26 @@ ${data.specialRequests ? `📝 Notes: ${data.specialRequests}` : '✅ No special
     console.log('✅ WhatsApp business notification sent successfully');
     console.log('- Message SID:', message.sid);
     console.log('- Status:', message.status);
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ WhatsApp business notification failed:', error);
+
+    // Log specific Twilio error details
+    if (error.code) {
+      console.error('   Error Code:', error.code);
+      console.error('   Error Message:', error.message);
+
+      // Common Twilio WhatsApp error codes
+      if (error.code === 63015) {
+        console.error('   📱 Solution: Recipient must join sandbox by sending "join <sandbox-word>" to +14155238886');
+      } else if (error.code === 63003) {
+        console.error('   ⚠️ Solution: Check your WhatsApp sender number configuration');
+      } else if (error.code === 63016) {
+        console.error('   ⚠️ Solution: Recipient has not accepted WhatsApp terms of service');
+      } else if (error.code === 20003) {
+        console.error('   ⚠️ Solution: Check your Twilio Account SID and Auth Token');
+      }
+    }
+
     throw error; // Let Promise.allSettled handle it
   }
 }
@@ -172,11 +191,23 @@ export async function POST(request: NextRequest) {
       customerEmail: emailValidation.formatted!
     };
 
-    // Generate booking ID with timestamp
-    const bookingId = `BK${Date.now()}`;
-    const timestamp = new Date().toISOString();
+    // Save booking to database
+    const savedBooking = await bookingDb.create({
+      date: validatedData.date,
+      time: validatedData.time,
+      service: validatedData.service,
+      customerName: validatedData.customerName,
+      customerPhone: validatedData.customerPhone,
+      customerEmail: validatedData.customerEmail,
+      vehicleType: validatedData.vehicleType,
+      specialRequests: validatedData.specialRequests,
+      status: 'confirmed'
+    });
 
-    console.log(`📝 New booking received: ${bookingId} at ${timestamp}`);
+    const bookingId = savedBooking.id;
+    const timestamp = savedBooking.createdAt;
+
+    console.log(`📝 New booking saved to database: ${bookingId} at ${timestamp}`);
 
     // Prepare email data
     const emailData = {

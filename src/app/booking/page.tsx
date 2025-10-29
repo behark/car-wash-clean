@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -40,6 +41,7 @@ const generateTimeSlots = () => {
 }
 
 export default function BookingPage() {
+  const router = useRouter()
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
@@ -53,7 +55,6 @@ export default function BookingPage() {
     notes: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isComplete, setIsComplete] = useState(false)
 
   const selectedServiceData = services.find(s => s.id === selectedService)
   const timeSlots = generateTimeSlots()
@@ -128,8 +129,17 @@ export default function BookingPage() {
       const result = await response.json()
       console.log('✅ Booking successful:', result)
 
-      setIsSubmitting(false)
-      setIsComplete(true)
+      // Store booking details in sessionStorage for the success page
+      sessionStorage.setItem('lastBooking', JSON.stringify({
+        bookingId: result.bookingId,
+        date: selectedDate,
+        time: selectedTime,
+        service: selectedServiceData?.name,
+        customerName: `${formData.firstName} ${formData.lastName}`
+      }))
+
+      // Redirect to success page
+      router.push('/booking/success')
     } catch (error) {
       console.error('💥 Booking failed:', error)
       setIsSubmitting(false)
@@ -145,8 +155,8 @@ export default function BookingPage() {
     if (step > 1) setStep(step - 1)
   }
 
-  // Success screen
-  if (isComplete) {
+  // Success screen removed - redirecting to /booking/success instead
+  /* if (isComplete) {
     return (
       <>
         <Header />
@@ -204,7 +214,7 @@ export default function BookingPage() {
         <Footer />
       </>
     )
-  }
+  } */
 
   const availableTimeSlots = getAvailableTimeSlots()
 

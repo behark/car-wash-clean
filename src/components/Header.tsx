@@ -38,14 +38,6 @@ export default function Header() {
               Palvelut
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
             </Link>
-            <Link href="/gallery" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Galleria
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link href="/testimonials" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
-              Arvostelut
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
-            </Link>
             <Link href="/about" className="text-silver-200 hover:text-gold-400 font-medium transition-colors duration-200 relative group">
               Tietoa meistä
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold-400 group-hover:w-full transition-all duration-300"></span>
@@ -98,12 +90,6 @@ export default function Header() {
           <nav className="py-4 space-y-2 border-t border-silver-600/30 overflow-y-auto">
             <Link href="/services" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
               Palvelut
-            </Link>
-            <Link href="/gallery" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Galleria
-            </Link>
-            <Link href="/testimonials" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
-              Arvostelut
             </Link>
             <Link href="/about" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
               Tietoa meistä
