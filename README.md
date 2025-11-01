@@ -135,4 +135,4 @@ To extend this project:
 
 ## 📝 Notes
 
-This clean version maintains all essential business functionality while removing enterprise-level complexity. Perfect for small to medium car wash businesses that need a professional web presence without over-engineering.
+This clean version maintains all essential business functionality while removing enterprise-level complexity. Perfect for small to medium car wash businesses that need a professional web presence without over-engineering.# Deployed on Vercel
