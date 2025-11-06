@@ -221,39 +221,36 @@ export async function POST(request: NextRequest) {
       bookingId
     };
 
-    // 🚀 FIRE-AND-FORGET: Send notifications in background (don't await)
-    console.log('🔄 Starting background notifications for booking:', bookingId);
+    // ✅ AWAIT notifications before responding (Vercel requirement)
+    console.log('🔄 Sending notifications for booking:', bookingId);
 
-    // Fire notifications in background without waiting
-    Promise.allSettled([
+    const results = await Promise.allSettled([
       // Customer email confirmation
-      sendBookingConfirmationEmail(emailData)
-        .then(() => console.log('✅ Customer email sent successfully'))
-        .catch(error => console.error('❌ Customer email failed:', error)),
-
+      sendBookingConfirmationEmail(emailData),
+      
       // Business email notification
-      sendBusinessNotificationEmail(emailData)
-        .then(() => console.log('✅ Business email sent successfully'))
-        .catch(error => console.error('❌ Business email failed:', error)),
-
+      sendBusinessNotificationEmail(emailData),
+      
       // WhatsApp business notification (if configured)
       sendWhatsAppNotification(validatedData, bookingId)
-    ]).then((results) => {
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
+    ]);
 
-      // Log detailed results for debugging
-      results.forEach((result, index) => {
-        const notificationTypes = ['Customer email', 'Business email', 'WhatsApp'];
-        if (result.status === 'rejected') {
-          console.error(`❌ ${notificationTypes[index]} failed:`, result.reason);
-        }
-      });
+    // Log detailed results
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
 
-      console.log(`🎉 Notifications completed for ${bookingId}: ${successful} successful, ${failed} failed`);
+    results.forEach((result, index) => {
+      const notificationTypes = ['Customer email', 'Business email', 'WhatsApp'];
+      if (result.status === 'fulfilled') {
+        console.log(`✅ ${notificationTypes[index]} sent successfully`);
+      } else {
+        console.error(`❌ ${notificationTypes[index]} failed:`, result.reason);
+      }
     });
 
-    // Respond immediately to user
+    console.log(`🎉 Notifications completed for ${bookingId}: ${successful} successful, ${failed} failed`);
+
+    // Respond to user after notifications are sent
     return NextResponse.json({
       success: true,
       message: 'Varaus vahvistettu! Lähetämme vahvistuksen sähköpostiisi.',
@@ -297,24 +294,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// Optional: Add rate limiting (uncomment if needed)
-// const bookingAttempts = new Map<string, number>();
-// 
-// function checkRateLimit(ip: string): boolean {
-//   const now = Date.now();
-//   const attempts = bookingAttempts.get(ip) || 0;
-//   
-//   if (attempts > 5) {
-//     return false; // Rate limited
-//   }
-//   
-//   bookingAttempts.set(ip, attempts + 1);
-//   
-//   // Clean up old entries
-//   setTimeout(() => {
-//     bookingAttempts.delete(ip);
-//   }, 60000); // Reset after 1 minute
-//   
-//   return true;
-// }
