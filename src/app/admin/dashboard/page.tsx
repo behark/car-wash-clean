@@ -1,110 +1,165 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
-// Mock data for demonstration
-const mockBookings = [
-  {
-    id: 'BK-2024-001',
-    date: '2024-10-30',
-    time: '10:00',
-    service: 'Käsinpesu + Sisäpuhdistus',
-    customerName: 'Matti Meikäläinen',
-    customerPhone: '+358401234567',
-    customerEmail: 'matti@example.com',
-    vehicleType: 'Henkilöauto',
-    status: 'confirmed',
-    price: 55
-  },
-  {
-    id: 'BK-2024-002',
-    date: '2024-10-30',
-    time: '14:00',
-    service: 'Käsinpesu + Kovavaha',
-    customerName: 'Liisa Lahtinen',
-    customerPhone: '+358409876543',
-    customerEmail: 'liisa@example.com',
-    vehicleType: 'SUV',
-    status: 'confirmed',
-    price: 110
-  },
-  {
-    id: 'BK-2024-003',
-    date: '2024-10-31',
-    time: '09:00',
-    service: 'Renkaiden Vaihto',
-    customerName: 'Pekka Pekkanen',
-    customerPhone: '+358405555555',
-    customerEmail: 'pekka@example.com',
-    vehicleType: 'Henkilöauto',
-    status: 'pending',
-    price: 20
-  }
-]
+interface Booking {
+  id: string
+  date: string
+  time: string
+  service: { titleFi: string; price: number; duration: number }
+  customerName: string
+  customerPhone: string
+  customerEmail: string
+  vehicleType: string
+  specialRequests?: string
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  createdAt: string
+  updatedAt: string
+}
+
+const AUTH_TOKEN = 'Bearer admin-kiilto-loisto-2024'
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const [bookings, setBookings] = useState(mockBookings)
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [allBookings, setAllBookings] = useState<Booking[]>([])
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [stats, setStats] = useState({
-    todayBookings: 3,
-    weekBookings: 12,
-    monthRevenue: 2450,
-    pendingConfirmations: 1
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    completed: 0,
+    cancelled: 0,
+    totalRevenue: 0,
   })
 
   useEffect(() => {
-    // Check authentication
     const isAuth = sessionStorage.getItem('adminAuth')
     if (!isAuth) {
       router.push('/admin')
     }
   }, [router])
 
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const res = await fetch('/api/admin/bookings', {
+        headers: { Authorization: AUTH_TOKEN },
+      })
+      if (!res.ok) throw new Error('Failed to fetch bookings')
+      const data = await res.json()
+      setAllBookings(data.bookings || [])
+      setStats(data.stats || { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0, totalRevenue: 0 })
+    } catch (err) {
+      setError('Varausten haku epäonnistui')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [fetchDashboardData])
+
+  useEffect(() => {
+    const filtered = allBookings.filter(b => b.date === selectedDate)
+    setBookings(filtered.sort((a, b) => a.time.localeCompare(b.time)))
+  }, [selectedDate, allBookings])
+
+  const handleStatusUpdate = async (id: string, status: Booking['status']) => {
+    try {
+      const res = await fetch('/api/admin/bookings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: AUTH_TOKEN },
+        body: JSON.stringify({ id, status }),
+      })
+      if (!res.ok) throw new Error('Update failed')
+      await fetchDashboardData()
+    } catch (err) {
+      console.error(err)
+      alert('Tilan päivitys epäonnistui')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Haluatko varmasti poistaa tämän varauksen?')) return
+    try {
+      const res = await fetch(`/api/admin/bookings?id=${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: AUTH_TOKEN },
+      })
+      if (!res.ok) throw new Error('Delete failed')
+      await fetchDashboardData()
+    } catch (err) {
+      console.error(err)
+      alert('Poisto epäonnistui')
+    }
+  }
+
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth')
     router.push('/admin')
   }
 
-  const filteredBookings = bookings.filter(booking => booking.date === selectedDate)
-
   const getStatusBadge = (status: string) => {
-    const badges = {
+    const badges: Record<string, string> = {
       confirmed: 'bg-green-100 text-green-800',
       pending: 'bg-yellow-100 text-yellow-800',
       cancelled: 'bg-red-100 text-red-800',
-      completed: 'bg-blue-100 text-blue-800'
+      completed: 'bg-blue-100 text-blue-800',
     }
-    return badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800'
+    return badges[status] || 'bg-gray-100 text-gray-800'
   }
 
   const getStatusText = (status: string) => {
-    const texts = {
+    const texts: Record<string, string> = {
       confirmed: 'Vahvistettu',
       pending: 'Odottaa',
       cancelled: 'Peruutettu',
-      completed: 'Valmis'
+      completed: 'Valmis',
     }
-    return texts[status as keyof typeof texts] || status
+    return texts[status] || status
   }
 
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('fi-FI', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    })
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0]
+  const todayBookings = allBookings.filter(b => b.date === todayStr)
+
   return (
-    <div className="min-h-screen bg-silver-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-navy-900 text-white shadow-lg">
+      <header className="bg-slate-900 text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold">Kiilto & Loisto Admin</h1>
-              <p className="text-silver-300 text-sm">Hallintapaneeli</p>
+              <p className="text-slate-400 text-sm">Hallintapaneeli</p>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-silver-300">Admin</span>
+              <button
+                onClick={fetchDashboardData}
+                className="text-slate-400 hover:text-white transition-colors"
+                title="Päivitä"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
+                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
               >
                 Kirjaudu ulos
               </button>
@@ -113,222 +168,192 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-silver-600 text-sm">Tänään</p>
-                <p className="text-3xl font-bold text-navy-900">{stats.todayBookings}</p>
-                <p className="text-sm text-silver-500">varausta</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <div className="bg-white rounded-xl shadow p-5">
+            <p className="text-gray-500 text-xs font-medium uppercase">Tänään</p>
+            <p className="text-3xl font-bold text-slate-900 mt-1">{todayBookings.length}</p>
+            <p className="text-sm text-gray-500">varausta</p>
           </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-silver-600 text-sm">Tämä viikko</p>
-                <p className="text-3xl font-bold text-navy-900">{stats.weekBookings}</p>
-                <p className="text-sm text-silver-500">varausta</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-            </div>
+          <div className="bg-white rounded-xl shadow p-5">
+            <p className="text-gray-500 text-xs font-medium uppercase">Yhteensä</p>
+            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
+            <p className="text-sm text-gray-500">varausta</p>
           </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-silver-600 text-sm">Kuukauden liikevaihto</p>
-                <p className="text-3xl font-bold text-navy-900">{stats.monthRevenue}€</p>
-                <p className="text-sm text-silver-500">+12% ed. kk</p>
-              </div>
-              <div className="w-12 h-12 bg-gold-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+          <div className="bg-white rounded-xl shadow p-5">
+            <p className="text-gray-500 text-xs font-medium uppercase">Vahvistettu</p>
+            <p className="text-3xl font-bold text-green-600 mt-1">{stats.confirmed}</p>
+            <p className="text-sm text-gray-500">varausta</p>
           </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-silver-600 text-sm">Odottaa vahvistusta</p>
-                <p className="text-3xl font-bold text-navy-900">{stats.pendingConfirmations}</p>
-                <p className="text-sm text-silver-500">varausta</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+          <div className="bg-white rounded-xl shadow p-5">
+            <p className="text-gray-500 text-xs font-medium uppercase">Odottaa</p>
+            <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
+            <p className="text-sm text-gray-500">varausta</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-5">
+            <p className="text-gray-500 text-xs font-medium uppercase">Liikevaihto</p>
+            <p className="text-3xl font-bold text-slate-900 mt-1">{stats.totalRevenue}€</p>
+            <p className="text-sm text-gray-500">ei-peruutettu</p>
           </div>
         </div>
 
         {/* Bookings Table */}
         <div className="bg-white rounded-xl shadow-lg">
-          <div className="p-6 border-b border-silver-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-navy-900">Varaukset</h2>
-              <div className="flex gap-4">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-xl font-bold text-slate-900">Varaukset</h2>
+              <div className="flex gap-3 items-center">
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-4 py-2 border border-silver-300 rounded-lg focus:ring-2 focus:ring-gold-500 focus:border-transparent"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-                <button className="bg-gold-500 hover:bg-gold-600 text-white px-4 py-2 rounded-lg transition-colors">
-                  Vie Excel
-                </button>
+                <span className="text-sm text-gray-500">
+                  {bookings.length} varausta · {formatDate(selectedDate)}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-silver-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Varausnumero
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Aika
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Asiakas
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Palvelu
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Hinta
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Tila
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-silver-600 uppercase tracking-wider">
-                    Toiminnot
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-silver-200">
-                {filteredBookings.length > 0 ? (
-                  filteredBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-silver-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-navy-900">{booking.id}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-navy-900">{booking.time}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          <div className="font-medium text-navy-900">{booking.customerName}</div>
-                          <div className="text-silver-600">{booking.customerPhone}</div>
-                          <div className="text-silver-500 text-xs">{booking.customerEmail}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          <div className="text-navy-900">{booking.service}</div>
-                          <div className="text-silver-600 text-xs">{booking.vehicleType}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-navy-900">{booking.price}€</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(booking.status)}`}>
-                          {getStatusText(booking.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button className="text-gold-600 hover:text-gold-700 mr-3">
-                          Muokkaa
-                        </button>
-                        <button className="text-red-600 hover:text-red-700">
-                          Peruuta
-                        </button>
+          {loading ? (
+            <div className="p-12 text-center">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-gray-500">Ladataan varauksia...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Aika</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Asiakas</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Palvelu</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Ajoneuvo</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Hinta</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Tila</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">Toiminnot</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {bookings.length > 0 ? (
+                    bookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-slate-900">{booking.time}</span>
+                          <span className="text-xs text-gray-500 ml-1">({booking.service.duration}min)</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="text-sm">
+                            <div className="font-medium text-slate-900">{booking.customerName}</div>
+                            <div className="text-gray-600">{booking.customerPhone}</div>
+                            <div className="text-gray-400 text-xs">{booking.customerEmail}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="text-sm text-slate-900">{booking.service.titleFi}</div>
+                          {booking.specialRequests && (
+                            <div className="text-xs text-amber-700 mt-1">💡 {booking.specialRequests}</div>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm text-gray-700">{booking.vehicleType}</span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-slate-900">{booking.service.price}€</span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(booking.status)}`}>
+                            {getStatusText(booking.status)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm">
+                          <div className="flex gap-1">
+                            {booking.status === 'pending' && (
+                              <button
+                                onClick={() => handleStatusUpdate(booking.id, 'confirmed')}
+                                className="text-green-600 hover:text-green-700 font-medium"
+                              >
+                                Vahvista
+                              </button>
+                            )}
+                            {booking.status === 'confirmed' && (
+                              <button
+                                onClick={() => handleStatusUpdate(booking.id, 'completed')}
+                                className="text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Valmis
+                              </button>
+                            )}
+                            {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                              <button
+                                onClick={() => handleStatusUpdate(booking.id, 'cancelled')}
+                                className="text-red-600 hover:text-red-700 font-medium"
+                              >
+                                Peruuta
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDelete(booking.id)}
+                              className="text-gray-400 hover:text-red-600 font-medium"
+                              title="Poista"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center">
+                        <p className="text-gray-500">Ei varauksia valitulle päivälle</p>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <p className="text-silver-500">Ei varauksia valitulle päivälle</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/admin/bookings/new"
-            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
-          >
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+        {/* Recent bookings across all dates */}
+        <div className="mt-8 bg-white rounded-xl shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-bold text-slate-900">Viimeisimmät varaukset</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {allBookings.slice(0, 10).map((booking) => (
+              <div key={booking.id} className="px-6 py-3 flex items-center justify-between hover:bg-gray-50">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm">
+                    <span className="font-medium text-slate-900">{formatDate(booking.date)}</span>
+                    <span className="text-gray-500 ml-2">{booking.time}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{booking.customerName}</p>
+                    <p className="text-xs text-gray-500">{booking.service.titleFi}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold">{booking.service.price}€</span>
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getStatusBadge(booking.status)}`}>
+                    {getStatusText(booking.status)}
+                  </span>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-navy-900">Uusi varaus</h3>
-                <p className="text-sm text-silver-600">Luo varaus manuaalisesti</p>
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/admin/services"
-            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
-          >
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-navy-900">Hallitse palveluita</h3>
-                <p className="text-sm text-silver-600">Muokkaa hintoja ja palveluita</p>
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/admin/reports"
-            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer"
-          >
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v1a1 1 0 001 1h4a1 1 0 001-1v-1m3-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8m5 0h2m2 0h3m-10 0h-3m9-13V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M8 6h8" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-navy-900">Raportit</h3>
-                <p className="text-sm text-silver-600">Näytä tilastot ja raportit</p>
-              </div>
-            </div>
-          </Link>
+            ))}
+            {allBookings.length === 0 && (
+              <div className="px-6 py-8 text-center text-gray-500">Ei varauksia</div>
+            )}
+          </div>
         </div>
       </main>
     </div>
