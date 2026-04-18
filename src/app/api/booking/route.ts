@@ -98,7 +98,7 @@ ${data.specialRequests ? `📝 Notes: ${data.specialRequests}` : '✅ No special
 function validateDateTime(date: string, time: string): { isValid: boolean; error?: string } {
   try {
     const bookingDate = new Date(date);
-    
+
     // Check if date is valid
     if (isNaN(bookingDate.getTime())) {
       return { isValid: false, error: 'Invalid date format' };
@@ -120,6 +120,27 @@ function validateDateTime(date: string, time: string): { isValid: boolean; error
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(time)) {
       return { isValid: false, error: 'Invalid time format' };
+    }
+
+    // Validate time is within working hours
+    const [hour, minute] = time.split(':').map(Number);
+    const timeInMinutes = hour * 60 + minute;
+    const dayOfWeek = bookingDate.getDay();
+
+    if (dayOfWeek === 6) {
+      // Saturday: 10:00-16:00
+      const satOpen = 10 * 60; // 600
+      const satClose = 16 * 60; // 960
+      if (timeInMinutes < satOpen || timeInMinutes >= satClose) {
+        return { isValid: false, error: 'Lauantaisin olemme avoinna klo 10:00-16:00' };
+      }
+    } else {
+      // Weekdays: 08:00-18:00
+      const weekdayOpen = 8 * 60; // 480
+      const weekdayClose = 18 * 60; // 1080
+      if (timeInMinutes < weekdayOpen || timeInMinutes >= weekdayClose) {
+        return { isValid: false, error: 'Arkipäivisin olemme avoinna klo 08:00-18:00' };
+      }
     }
 
     return { isValid: true };
@@ -191,6 +212,15 @@ export async function POST(request: NextRequest) {
       customerEmail: emailValidation.formatted!
     };
 
+    // Check if time slot is still available
+    const isAvailable = await bookingDb.isTimeSlotAvailable(validatedData.date, validatedData.time);
+    if (!isAvailable) {
+      return NextResponse.json(
+        { error: 'Valittu aika on jo varattu. Valitse toinen aika.' },
+        { status: 409 }
+      );
+    }
+
     // Save booking to database
     const savedBooking = await bookingDb.create({
       date: validatedData.date,
@@ -227,10 +257,10 @@ export async function POST(request: NextRequest) {
     const results = await Promise.allSettled([
       // Customer email confirmation
       sendBookingConfirmationEmail(emailData),
-      
+
       // Business email notification
       sendBusinessNotificationEmail(emailData),
-      
+
       // WhatsApp business notification (if configured)
       sendWhatsAppNotification(validatedData, bookingId)
     ]);

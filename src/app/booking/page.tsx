@@ -28,10 +28,20 @@ const services = [
   { id: 'penkkien-pesu', name: 'Penkkien Pesu', price: 100, category: 'Lisäpalvelut', icon: Sparkles, color: 'pink' }
 ]
 
-// Generate time slots
-const generateTimeSlots = () => {
+// Generate time slots based on business hours
+const generateTimeSlots = (dayOfWeek: number) => {
   const slots = []
-  for (let hour = 8; hour < 20; hour++) {
+  let startHour = 8
+  let endHour = 18 // MA-PE: 08:00-18:00, last slot 17:30
+
+  if (dayOfWeek === 6) { // Saturday: 10:00-16:00, last slot 15:30
+    startHour = 10
+    endHour = 16
+  } else if (dayOfWeek === 0) { // Sunday: closed
+    return []
+  }
+
+  for (let hour = startHour; hour < endHour; hour++) {
     for (let minute of [0, 30]) {
       const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
       slots.push(time)
@@ -56,8 +66,9 @@ export default function BookingPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [bookedSlots, setBookedSlots] = useState<string[]>([])
+
   const selectedServiceData = services.find(s => s.id === selectedService)
-  const timeSlots = generateTimeSlots()
 
   // Get minimum date (tomorrow)
   const getMinDate = () => {
@@ -72,18 +83,31 @@ export default function BookingPage() {
     return date.getDay() !== 0 // Not Sunday
   }
 
-  // Filter time slots for Saturdays (10:00-16:00)
+  // Fetch booked slots when date changes
+  const fetchBookedSlots = async (date: string) => {
+    try {
+      const res = await fetch(`/api/booking/slots?date=${date}`)
+      if (res.ok) {
+        const data = await res.json()
+        setBookedSlots(data.bookedSlots || [])
+      } else {
+        setBookedSlots([])
+      }
+    } catch {
+      setBookedSlots([])
+    }
+  }
+
+  // Get available time slots for the selected date
   const getAvailableTimeSlots = () => {
-    if (!selectedDate) return timeSlots
+    if (!selectedDate) return []
 
     const date = new Date(selectedDate)
-    if (date.getDay() === 6) { // Saturday
-      return timeSlots.filter(slot => {
-        const [hour] = slot.split(':').map(Number)
-        return hour >= 10 && hour < 16
-      })
-    }
-    return timeSlots
+    const dayOfWeek = date.getDay()
+    const allSlots = generateTimeSlots(dayOfWeek)
+
+    // Remove already booked slots
+    return allSlots.filter(slot => !bookedSlots.includes(slot))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -260,23 +284,20 @@ export default function BookingPage() {
                   return (
                     <div key={s.num} className="flex items-center flex-1">
                       <div className="flex flex-col items-center flex-1">
-                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
-                          step >= s.num
-                            ? 'bg-purple-600 text-white shadow-lg scale-110'
-                            : 'bg-slate-200 text-slate-400'
-                        }`}>
+                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${step >= s.num
+                          ? 'bg-purple-600 text-white shadow-lg scale-110'
+                          : 'bg-slate-200 text-slate-400'
+                          }`}>
                           <Icon className="w-6 h-6" />
                         </div>
-                        <span className={`mt-2 text-xs sm:text-sm font-medium ${
-                          step >= s.num ? 'text-purple-600' : 'text-slate-400'
-                        }`}>
+                        <span className={`mt-2 text-xs sm:text-sm font-medium ${step >= s.num ? 'text-purple-600' : 'text-slate-400'
+                          }`}>
                           {s.title}
                         </span>
                       </div>
                       {idx < 2 && (
-                        <div className={`h-1 flex-1 mx-2 transition-all ${
-                          step > s.num ? 'bg-purple-600' : 'bg-slate-200'
-                        }`} />
+                        <div className={`h-1 flex-1 mx-2 transition-all ${step > s.num ? 'bg-purple-600' : 'bg-slate-200'
+                          }`} />
                       )}
                     </div>
                   )
@@ -318,11 +339,10 @@ export default function BookingPage() {
                                   <div
                                     key={service.id}
                                     onClick={() => setSelectedService(service.id)}
-                                    className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all hover:scale-105 ${
-                                      isSelected
-                                        ? 'border-purple-600 bg-purple-50 shadow-lg'
-                                        : 'border-slate-200 hover:border-purple-300 bg-white'
-                                    }`}
+                                    className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all hover:scale-105 ${isSelected
+                                      ? 'border-purple-600 bg-purple-50 shadow-lg'
+                                      : 'border-slate-200 hover:border-purple-300 bg-white'
+                                      }`}
                                   >
                                     {service.popular && (
                                       <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
@@ -332,9 +352,8 @@ export default function BookingPage() {
                                     )}
 
                                     <div className="flex items-start gap-3">
-                                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                        isSelected ? 'bg-purple-200' : 'bg-slate-100'
-                                      }`}>
+                                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-purple-200' : 'bg-slate-100'
+                                        }`}>
                                         <Icon className={`w-5 h-5 ${isSelected ? 'text-purple-600' : 'text-slate-600'}`} />
                                       </div>
 
@@ -394,6 +413,7 @@ export default function BookingPage() {
                             if (isValidDate(e.target.value)) {
                               setSelectedDate(e.target.value)
                               setSelectedTime('')
+                              fetchBookedSlots(e.target.value)
                             }
                           }}
                           min={getMinDate()}
@@ -416,11 +436,10 @@ export default function BookingPage() {
                                 key={time}
                                 type="button"
                                 onClick={() => setSelectedTime(time)}
-                                className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
-                                  selectedTime === time
-                                    ? 'bg-purple-600 text-white shadow-lg scale-105'
-                                    : 'bg-slate-100 hover:bg-purple-100 text-slate-700'
-                                }`}
+                                className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${selectedTime === time
+                                  ? 'bg-purple-600 text-white shadow-lg scale-105'
+                                  : 'bg-slate-100 hover:bg-purple-100 text-slate-700'
+                                  }`}
                               >
                                 {time}
                               </button>
@@ -490,7 +509,7 @@ export default function BookingPage() {
                               type="text"
                               required
                               value={formData.firstName}
-                              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
                               placeholder="Matti"
                             />
@@ -507,7 +526,7 @@ export default function BookingPage() {
                               type="text"
                               required
                               value={formData.lastName}
-                              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
                               placeholder="Virtanen"
                             />
@@ -526,7 +545,7 @@ export default function BookingPage() {
                               type="email"
                               required
                               value={formData.email}
-                              onChange={(e) => setFormData({...formData, email: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
                               placeholder="matti@email.com"
                             />
@@ -543,7 +562,7 @@ export default function BookingPage() {
                               type="tel"
                               required
                               value={formData.phone}
-                              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
                               placeholder="+358 40 123 4567"
                             />
@@ -560,7 +579,7 @@ export default function BookingPage() {
                           <input
                             type="text"
                             value={formData.carModel}
-                            onChange={(e) => setFormData({...formData, carModel: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, carModel: e.target.value })}
                             className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all"
                             placeholder="esim. Toyota Corolla"
                           />
@@ -576,7 +595,7 @@ export default function BookingPage() {
                           <textarea
                             rows={4}
                             value={formData.notes}
-                            onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-purple-600 focus:ring-2 focus:ring-purple-200 transition-all resize-none"
                             placeholder="Kerro meille lisätietoja tai toiveita..."
                           />
