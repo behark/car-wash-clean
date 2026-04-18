@@ -1,29 +1,47 @@
-import { createClient } from '@sanity/client'
+import { createClient, SanityClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
 
-// Configuration for Sanity client with aggressive memory optimizations
-export const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  useCdn: true,
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_API_TOKEN,
-  requestTagPrefix: 'cw',
-  ignoreBrowserTokenWarning: true,
-  stega: {
-    enabled: false,
-  },
-  // Aggressive memory optimization settings
-  withCredentials: false,
-  maxRetries: 1,
-  timeout: 5000,
-  allowReconfigure: false,
-})
+// Check if Sanity is properly configured
+const isSanityConfigured = !!(
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID &&
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID.trim()
+)
+
+// Lazy-initialize Sanity client only when configured
+let _client: SanityClient | null = null
+
+export function getClient(): SanityClient | null {
+  if (!isSanityConfigured) return null
+  if (!_client) {
+    _client = createClient({
+      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!.trim(),
+      dataset: (process.env.NEXT_PUBLIC_SANITY_DATASET || 'production').trim(),
+      useCdn: true,
+      apiVersion: (process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2024-01-01').trim(),
+      token: process.env.SANITY_API_TOKEN?.trim(),
+      requestTagPrefix: 'cw',
+      ignoreBrowserTokenWarning: true,
+      stega: {
+        enabled: false,
+      },
+      withCredentials: false,
+      maxRetries: 1,
+      timeout: 5000,
+      allowReconfigure: false,
+    })
+  }
+  return _client
+}
+
+// Backward-compatible export (null when not configured)
+export const client = getClient()
 
 // Helper for generating image URLs
-const builder = imageUrlBuilder(client)
-
-export const urlFor = (source: any) => builder.image(source)
+export const urlFor = (source: any) => {
+  const c = getClient()
+  if (!c) return ''
+  return imageUrlBuilder(c).image(source)
+}
 
 // Service type definition
 export interface Service {
@@ -109,7 +127,13 @@ export async function getServices(): Promise<Service[]> {
       return servicesCache.data;
     }
 
-    const data = await client.fetch(serviceQuery, {}, {
+    const c = getClient();
+    if (!c) {
+      console.log('Sanity not configured, returning empty services');
+      return [];
+    }
+
+    const data = await c.fetch(serviceQuery, {}, {
       cache: 'force-cache',
       next: { revalidate: 600 } // 10 minutes
     });
@@ -152,7 +176,13 @@ export async function getTestimonials(): Promise<Testimonial[]> {
       return testimonialsCache.data;
     }
 
-    const data = await client.fetch(testimonialQuery, {}, {
+    const c = getClient();
+    if (!c) {
+      console.log('Sanity not configured, returning empty testimonials');
+      return [];
+    }
+
+    const data = await c.fetch(testimonialQuery, {}, {
       cache: 'force-cache',
       next: { revalidate: 600 } // 10 minutes
     });

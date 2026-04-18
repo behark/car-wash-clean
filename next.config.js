@@ -1,5 +1,10 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fix multiple lockfiles warning
+  outputFileTracingRoot: path.join(__dirname),
+
   // Optimized for Vercel deployment
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
