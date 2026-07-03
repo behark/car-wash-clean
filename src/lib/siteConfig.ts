@@ -4,7 +4,7 @@ export const siteConfig = {
   tagline: 'PERUS- & ERIKOISPESUT RENKAIDEN VAIHTO & SÄILYTYS',
   subtitle: 'Ammattitaitoista autopesupalvelua Helsingissä',
   siteUrl: 'https://www.kiiltoloisto.fi',
-  heroImage: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2000&auto=format&fit=crop',
+  heroImage: '/images/hero-car-wash-professional.jpg',
   phone: {
     display: '044 960 8148',
     tel: '+358449608148',

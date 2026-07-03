@@ -251,6 +251,48 @@ export async function sendBookingConfirmationEmail(data: BookingEmailData): Prom
   }
 }
 
+export interface ContactMessageData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  service?: string;
+  message: string;
+}
+
+// Send contact form message to the business inbox
+export async function sendContactMessageEmail(data: ContactMessageData): Promise<boolean> {
+  try {
+    const transporter = createTransporter();
+
+    const text = `
+UUSI YHTEYDENOTTO VERKKOSIVUILTA
+
+Nimi: ${data.firstName} ${data.lastName}
+Sähköposti: ${data.email}
+${data.phone ? `Puhelin: ${data.phone}` : 'Puhelin: ei annettu'}
+${data.service ? `Kiinnostava palvelu: ${data.service}` : ''}
+
+Viesti:
+${data.message}
+
+--
+Automaattinen ilmoitus yhteydenottolomakkeesta
+`;
+
+    await transporter.sendMail({
+      from: `"Yhteydenottolomake" <${process.env.SMTP_FROM}>`,
+      to: process.env.CONTACT_EMAIL || process.env.SMTP_FROM,
+      subject: `📩 Yhteydenotto: ${data.firstName} ${data.lastName}`,
+      text,
+    });
+    return true;
+  } catch (error) {
+    console.error('Contact email sending failed:', error);
+    return false;
+  }
+}
+
 // Send business notification email (backup to WhatsApp)
 export async function sendBusinessNotificationEmail(data: BookingEmailData): Promise<boolean> {
   try {

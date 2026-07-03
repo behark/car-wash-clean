@@ -18,8 +18,6 @@ interface Booking {
   updatedAt: string
 }
 
-const AUTH_TOKEN = 'Bearer admin-kiilto-loisto-2024'
-
 export default function AdminDashboard() {
   const router = useRouter()
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -36,20 +34,15 @@ export default function AdminDashboard() {
     totalRevenue: 0,
   })
 
-  useEffect(() => {
-    const isAuth = sessionStorage.getItem('adminAuth')
-    if (!isAuth) {
-      router.push('/admin')
-    }
-  }, [router])
-
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true)
       setError('')
-      const res = await fetch('/api/admin/bookings', {
-        headers: { Authorization: AUTH_TOKEN },
-      })
+      const res = await fetch('/api/admin/bookings')
+      if (res.status === 401) {
+        router.push('/admin')
+        return
+      }
       if (!res.ok) throw new Error('Failed to fetch bookings')
       const data = await res.json()
       setAllBookings(data.bookings || [])
@@ -60,7 +53,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     fetchDashboardData()
@@ -75,7 +68,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/bookings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: AUTH_TOKEN },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status }),
       })
       if (!res.ok) throw new Error('Update failed')
@@ -91,7 +84,6 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`/api/admin/bookings?id=${id}`, {
         method: 'DELETE',
-        headers: { Authorization: AUTH_TOKEN },
       })
       if (!res.ok) throw new Error('Delete failed')
       await fetchDashboardData()
@@ -101,8 +93,8 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth')
+  const handleLogout = async () => {
+    await fetch('/api/admin/login', { method: 'DELETE' }).catch(() => null)
     router.push('/admin')
   }
 

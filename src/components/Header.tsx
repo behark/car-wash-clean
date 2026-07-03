@@ -64,7 +64,7 @@ export default function Header() {
 
             <Link
               href="/booking"
-              className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-navy-900 font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Varaa aika
             </Link>
@@ -72,7 +72,7 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-silver-200 focus:outline-none focus:ring-2 focus:ring-gold-500 rounded-lg p-2"
+            className="lg:hidden text-silver-200 focus:outline-none focus:ring-2 focus:ring-gold-500 rounded-lg p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <svg className={`w-6 h-6 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`lg:hidden overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
           <nav className="py-4 space-y-2 border-t border-silver-600/30 overflow-y-auto">
             <Link href="/services" className="block px-4 py-3 text-silver-200 hover:bg-gold-500/10 hover:text-gold-400 rounded-lg transition-colors">
               Palvelut
@@ -106,7 +106,7 @@ export default function Header() {
               </a>
               <Link
                 href="/booking"
-                className="block mx-4 mt-2 bg-gradient-to-r from-gold-500 to-gold-600 text-navy-900 font-semibold px-6 py-3 rounded-xl text-center transition-all duration-300"
+                className="block mx-4 mt-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl text-center transition-all duration-300"
               >
                 Varaa aika nyt
               </Link>

@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bookingDb from '@/lib/db/bookings';
-
-// Simple authentication check
-function isAuthenticated(request: NextRequest): boolean {
-  // In production, use proper JWT tokens and authentication
-  const authHeader = request.headers.get('authorization');
-
-  // For demo purposes, check a simple Bearer token
-  // In production, validate JWT token here
-  return authHeader === 'Bearer admin-kiilto-loisto-2024';
-}
+import { isAuthenticated } from '@/lib/adminAuth';
 
 // GET: Fetch bookings for admin dashboard
 export async function GET(request: NextRequest) {

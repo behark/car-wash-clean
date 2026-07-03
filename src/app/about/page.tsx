@@ -34,12 +34,12 @@ export default function AboutPage() {
             <div className="max-w-4xl mx-auto">
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-12 mb-12">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-6">
-                  Tarinамme
+                  Tarinamme
                 </h2>
                 <div className="prose prose-lg max-w-none text-slate-700 space-y-4">
                   <p>
                     <strong>{siteConfig.name}</strong> on perustettu vuonna 2010 intohimosta autojen hoitoon ja 
-                    asiakaspalveluun. Olemme kasvaneet pienestä perheyritыksestä Helsingin luotetuimmaksi 
+                    asiakaspalveluun. Olemme kasvaneet pienestä perheyrityksestä Helsingin luotetuimmaksi 
                     autopesupalveluksi.
                   </p>
                   <p>

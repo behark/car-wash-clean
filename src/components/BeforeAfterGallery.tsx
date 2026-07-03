@@ -18,31 +18,31 @@ interface BeforeAfterImage {
 const beforeAfterImages: BeforeAfterImage[] = [
   {
     id: '1',
-    before: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
-    after: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=800&auto=format&fit=crop',
-    titleFi: 'Täydellinen Auton Muodonmuutos',
-    descriptionFi: 'Pölyisestä ja laiminlyödystä näyttelysalin kuntoon',
-    serviceFi: 'Premium Yksityiskohtainen Palvelu',
+    before: '/images/gallery/car-wash-01.jpg',
+    after: '/images/gallery/car-wash-02.jpg',
+    titleFi: 'Käsinpesu ja vahaus',
+    descriptionFi: 'Huolellinen käsinpesu palauttaa maalipinnan kiillon',
+    serviceFi: 'Käsinpesu + Normaalivaha',
     duration: '90 min',
     rating: 5
   },
   {
     id: '2',
-    before: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=800&auto=format&fit=crop',
-    after: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=800&auto=format&fit=crop',
-    titleFi: 'Sisätilojen Syvapesu',
-    descriptionFi: 'Ammattimainen sisätilojen kunnostus ja desinfioiminen',
-    serviceFi: 'Sisätilojen Yksityiskohdat',
+    before: '/images/gallery/car-wash-03.jpg',
+    after: '/images/gallery/car-wash-04.jpg',
+    titleFi: 'Sisätilojen syväpuhdistus',
+    descriptionFi: 'Matot, imurointi, ikkunat ja pölyjen poisto',
+    serviceFi: 'Käsinpesu + Sisäpuhdistus',
     duration: '60 min',
     rating: 5
   },
   {
     id: '3',
-    before: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?q=80&w=800&auto=format&fit=crop',
-    after: 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=800&auto=format&fit=crop',
-    titleFi: 'Maastoauton Täydellinen Muodonmuutos',
-    descriptionFi: 'Suurten ajoneuvojen erikoispesu ja suojaus',
-    serviceFi: 'Maastoauton Premium Pesu',
+    before: '/images/gallery/car-wash-05.jpg',
+    after: '/images/gallery/car-wash-06.jpg',
+    titleFi: 'Maalipinnan kiillotus',
+    descriptionFi: '3-vaiheinen kiillotus ja käsinvahaus',
+    serviceFi: 'Maalipinnan Kiillotus',
     duration: '75 min',
     rating: 4.9
   }

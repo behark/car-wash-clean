@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { siteConfig } from '../lib/siteConfig'
 
 export default function Hero() {
@@ -21,21 +22,6 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
       </div>
 
-      {/* Floating Trust Badges */}
-      <div className="absolute top-8 right-8 z-20 hidden lg:block">
-        <div className="flex flex-col space-y-4">
-          <div className="bg-white/10 backdrop-blur-lg shadow-2xl border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium animate-fade-in hover:scale-105 transition-all duration-300">
-            ⭐ {siteConfig.features.rating} / 5.0 Arvosana
-          </div>
-          <div className="bg-white/10 backdrop-blur-lg shadow-2xl border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium animate-fade-in animation-delay-500 hover:scale-105 transition-all duration-300">
-            📞 {siteConfig.phone.display}
-          </div>
-          <div className="bg-white/10 backdrop-blur-lg shadow-2xl border border-white/20 rounded-xl px-4 py-3 text-white text-sm font-medium animate-fade-in animation-delay-1000 hover:scale-105 transition-all duration-300">
-            🕒 {siteConfig.hours[0].label}: {siteConfig.hours[0].value}, {siteConfig.hours[1].label}: {siteConfig.hours[1].value}
-          </div>
-        </div>
-      </div>
-
       {/* Main Hero Content */}
       <div className="relative z-10 text-center text-white px-4 max-w-6xl mx-auto">
         {/* Hero Badge */}
@@ -45,11 +31,14 @@ export default function Hero() {
           </span>
         </div>
 
-
+        {/* Main Heading */}
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-4 max-w-5xl mx-auto leading-tight animate-slide-up">
+          Autopesu Helsingissä – {siteConfig.shortName}
+        </h1>
 
         {/* Subtitle */}
-        <p className="text-xl md:text-2xl lg:text-3xl text-silver-200 mb-4 max-w-4xl mx-auto leading-relaxed animate-slide-up animation-delay-200">
-          {siteConfig.tagline}
+        <p className="text-lg md:text-xl lg:text-2xl text-silver-200 mb-4 max-w-4xl mx-auto leading-relaxed animate-slide-up animation-delay-200">
+          Perus- ja erikoispesut, renkaiden vaihto & säilytys
         </p>
 
         <p className="text-lg md:text-xl text-silver-300 mb-12 max-w-3xl mx-auto animate-slide-up animation-delay-300">
@@ -58,9 +47,9 @@ export default function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up animation-delay-500">
-          <button
-            onClick={() => window.location.href = '/booking'}
-            className="group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-5 px-10 rounded-xl text-xl transition-all duration-300 transform hover:scale-110 shadow-xl hover:shadow-glow-lg ring-2 ring-purple-400/50 hover:ring-purple-300"
+          <Link
+            href="/booking"
+            className="group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-5 px-10 rounded-xl text-xl transition-all duration-300 transform hover:scale-110 shadow-xl ring-2 ring-purple-400/50 hover:ring-purple-300"
           >
             <span className="relative z-10 flex items-center gap-2">
               Varaa aika nyt
@@ -69,14 +58,14 @@ export default function Hero() {
               </svg>
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-purple-500 rounded-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm"></div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => window.location.href = '/services'}
+          <Link
+            href="/services"
             className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all duration-300 hover:border-purple-400/50"
           >
             Tutustu palveluihin
-          </button>
+          </Link>
         </div>
 
         {/* Trust Indicators */}

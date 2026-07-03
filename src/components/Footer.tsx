@@ -112,7 +112,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-navy-700">
           <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
             <p className="text-silver-300 text-sm">
-              © 2024 {siteConfig.name}. Kaikki oikeudet pidätetään.
+              © {new Date().getFullYear()} {siteConfig.name}. Kaikki oikeudet pidätetään.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link

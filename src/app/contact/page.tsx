@@ -24,8 +24,16 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.error || 'Viestin lähetys epäonnistui. Yritä uudelleen.')
+      }
 
       showToast({
         type: 'success',
@@ -46,7 +54,7 @@ export default function ContactPage() {
       showToast({
         type: 'error',
         title: 'Virhe',
-        message: 'Viestin lähetys epäonnistui. Yritä uudelleen.'
+        message: error instanceof Error ? error.message : 'Viestin lähetys epäonnistui. Yritä uudelleen.'
       })
     } finally {
       setIsSubmitting(false)

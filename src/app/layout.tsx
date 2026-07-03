@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     siteName: 'Kiilto & Loisto',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1200&h=630&auto=format&fit=crop',
+        url: 'https://www.kiiltoloisto.fi/images/hero-car-wash-professional.jpg',
         width: 1200,
         height: 630,
         alt: 'Autopesu Kiilto & Loisto - Ammattitasoinen autopesu',
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Autopesu Kiilto & Loisto',
     description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS',
-    images: ['https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1200&h=630&auto=format&fit=crop'],
+    images: ['https://www.kiiltoloisto.fi/images/hero-car-wash-professional.jpg'],
   },
   robots: {
     index: true,

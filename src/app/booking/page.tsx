@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Calendar, Clock, Car, CheckCircle2, Sparkles, Star, Shield, Droplets, Award, Zap, User, Mail, Phone, FileText } from 'lucide-react'
+import { useToast } from '@/components/Toast'
 
 // REAL Services matching your business
 const services = [
@@ -52,6 +53,7 @@ const generateTimeSlots = (dayOfWeek: number) => {
 
 export default function BookingPage() {
   const router = useRouter()
+  const { showToast } = useToast()
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
@@ -131,9 +133,6 @@ export default function BookingPage() {
         specialRequests: formData.notes || ''
       }
 
-      console.log('🚀 Submitting booking:', bookingData)
-
-      // Send to API - FIXED ENDPOINT
       const response = await fetch('/api/booking', {
         method: 'POST',
         headers: {
@@ -142,16 +141,12 @@ export default function BookingPage() {
         body: JSON.stringify(bookingData),
       })
 
-      console.log('📡 Response status:', response.status)
-
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('❌ API Error:', errorData)
         throw new Error(errorData.error || 'Varaus epäonnistui')
       }
 
       const result = await response.json()
-      console.log('✅ Booking successful:', result)
 
       // Store booking details in sessionStorage for the success page
       sessionStorage.setItem('lastBooking', JSON.stringify({
@@ -165,9 +160,12 @@ export default function BookingPage() {
       // Redirect to success page
       router.push('/booking/success')
     } catch (error) {
-      console.error('💥 Booking failed:', error)
       setIsSubmitting(false)
-      alert(error instanceof Error ? error.message : 'Varaus epäonnistui. Yritä uudelleen.')
+      showToast({
+        type: 'error',
+        title: 'Varaus epäonnistui',
+        message: error instanceof Error ? error.message : 'Yritä uudelleen tai soita meille.'
+      })
     }
   }
 

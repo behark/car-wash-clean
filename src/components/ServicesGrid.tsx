@@ -13,46 +13,8 @@ type Service = {
   image?: string
 }
 
-type MockService = {
-  id: number
-  titleFi: string
-  descriptionFi: string
-  priceCents: number
-  durationMinutes: number
-  image: string
-}
-
-// Professional services with car wash business imagery
-const mockServices: MockService[] = [
-  {
-    id: 1,
-    titleFi: "Peruspesu",
-    descriptionFi: "Perusteellinen auton ulko- ja sisäpuolen puhdistus. Sisältää pesun, kuivauksen ja peruspintojen puhdistuksen.",
-    priceCents: 1500,
-    durationMinutes: 45,
-    image: "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=600&auto=format&fit=crop"
-  },
-  {
-    id: 2,
-    titleFi: "Erikoispesu",
-    descriptionFi: "Erikoispesu vahauksen kanssa. Antaa autolle kestävän suojan ja upean kiillon, joka kestää pitkään.",
-    priceCents: 2500,
-    durationMinutes: 75,
-    image: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?q=80&w=600&auto=format&fit=crop"
-  },
-  {
-    id: 3,
-    titleFi: "Renkaiden vaihto & säilytys",
-    descriptionFi: "Ammattitaitoinen renkaiden vaihto kausittain ja turvallinen säilytyspalvelu. Helppo nouto ja palautus.",
-    priceCents: 4000,
-    durationMinutes: 45,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=600&auto=format&fit=crop"
-  }
-]
-
 export default function ServicesGrid({ services }: { services: Service[] }) {
-  // Use mock services if no real services are provided
-  const displayServices: Array<Service | MockService> = services && services.length > 0 ? services : mockServices
+  const displayServices: Service[] = services || []
 
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

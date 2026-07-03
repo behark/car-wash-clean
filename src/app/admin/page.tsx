@@ -14,14 +14,22 @@ export default function AdminLogin() {
     setError('')
     setIsLoading(true)
 
-    // Simple client-side authentication (for demo purposes)
-    // In production, this should be handled by a proper auth system
-    if (credentials.username === 'admin' && credentials.password === 'KiiltoLoisto2024!') {
-      // Store auth state (in production, use proper JWT tokens)
-      sessionStorage.setItem('adminAuth', 'true')
-      router.push('/admin/dashboard')
-    } else {
-      setError('Virheellinen käyttäjätunnus tai salasana')
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+      })
+
+      if (response.ok) {
+        router.push('/admin/dashboard')
+      } else {
+        const data = await response.json().catch(() => null)
+        setError(data?.error || 'Virheellinen käyttäjätunnus tai salasana')
+        setIsLoading(false)
+      }
+    } catch {
+      setError('Kirjautuminen epäonnistui. Yritä uudelleen.')
       setIsLoading(false)
     }
   }
@@ -111,15 +119,6 @@ export default function AdminLogin() {
             >
               Ota yhteyttä tukeen
             </a>
-          </div>
-
-          {/* Demo Credentials Notice */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-800">
-              <strong>Demo-tunnukset:</strong><br />
-              Käyttäjä: admin<br />
-              Salasana: KiiltoLoisto2024!
-            </p>
           </div>
         </div>
       </div>
