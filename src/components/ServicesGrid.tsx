@@ -1,3 +1,4 @@
+import BookingCta from '@/components/BookingCta'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -68,12 +69,9 @@ export default function ServicesGrid({ services }: { services: Service[] }) {
                   </div>
                 </div>
 
-                <Link
-                  href="/booking"
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                >
+                <BookingCta className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" size="sm" service={service.titleFi}>
                   Varaa nyt
-                </Link>
+                </BookingCta>
               </div>
 
               {/* Guarantee Badge */}

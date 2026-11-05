@@ -1,13 +1,22 @@
+// false = online booking is off (season): buttons become call + WhatsApp, /booking shows
+// a notice and the booking API refuses new bookings. Set to true to bring it all back.
+const onlineBookingEnabled: boolean = false
+
 export const siteConfig = {
   name: 'Autopesu Kiilto & Loisto',
   shortName: 'Kiilto & Loisto',
   tagline: 'PERUS- & ERIKOISPESUT RENKAIDEN VAIHTO & SÄILYTYS',
   subtitle: 'Ammattitaitoista autopesupalvelua Helsingissä',
-  siteUrl: 'https://www.kiiltoloisto.fi',
+  siteUrl: 'https://kiiltoloisto.fi',
   heroImage: '/images/hero-car-wash-professional.jpg',
   phone: {
     display: '044 960 8148',
     tel: '+358449608148',
+  },
+  booking: {
+    onlineEnabled: onlineBookingEnabled,
+    notice: 'Sesongin aikana ajanvaraus vain puhelimitse tai WhatsAppilla.',
+    metaCta: onlineBookingEnabled ? 'Varaa aika helposti verkossa!' : 'Varaa aika puhelimitse tai WhatsAppilla.',
   },
   address: {
     street: 'Läkkisepäntie 15',
@@ -50,3 +59,8 @@ export const siteConfig = {
 };
 
 export type SiteConfig = typeof siteConfig;
+
+export function whatsappUrl(message?: string): string {
+  const base = `https://wa.me/${siteConfig.phone.tel.replace(/\D/g, '')}`
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base
+}

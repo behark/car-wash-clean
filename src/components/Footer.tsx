@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram } from 'lucide-react'
-import { siteConfig } from '../lib/siteConfig'
+import { siteConfig, whatsappUrl } from '../lib/siteConfig'
 
 export default function Footer() {
   return (
@@ -87,12 +87,18 @@ export default function Footer() {
               >
                 Palvelut
               </Link>
+              {siteConfig.booking.onlineEnabled ? (
               <Link
                 href="/booking"
                 className="block text-silver-200 hover:text-white transition-colors"
               >
                 Varaa aika
               </Link>
+              ) : (
+                <a href={whatsappUrl('Hei, haluaisin varata ajan.')} target="_blank" rel="noopener noreferrer" className="block text-silver-200 hover:text-white transition-colors">
+                  Varaa WhatsAppilla
+                </a>
+              )}
               <Link
                 href="/contact"
                 className="block text-silver-200 hover:text-white transition-colors"

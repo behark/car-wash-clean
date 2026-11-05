@@ -1,3 +1,4 @@
+import BookingCta from '@/components/BookingCta'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -60,15 +61,14 @@ export default function GalleryPage() {
               <p className="text-lg text-slate-700 mb-6">
                 Haluatko autollesi saman käsittelyn?
               </p>
-              <Link
-                href="/booking"
-                className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
+              <BookingCta className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg" size="lg">
                 Varaa aika nyt
-              </Link>
+              </BookingCta>
+              {siteConfig.booking.onlineEnabled && (
               <p className="text-sm text-slate-500 mt-4">
                 tai soita <a href={`tel:${siteConfig.phone.tel}`} className="text-purple-600 font-medium">{siteConfig.phone.display}</a>
               </p>
+              )}
             </div>
           </div>
         </section>

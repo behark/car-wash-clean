@@ -1,5 +1,7 @@
 'use client'
 
+import BookingNotice from '@/components/BookingNotice'
+import BookingCta from '@/components/BookingCta'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '../lib/siteConfig'
@@ -45,12 +47,11 @@ export default function Hero() {
           {siteConfig.subtitle} - luotettavaa laatua ja kilpailukykyiset hinnat.
         </p>
 
+        <BookingNotice className="mb-6" />
+
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up animation-delay-500">
-          <Link
-            href="/booking"
-            className="group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-5 px-10 rounded-xl text-xl transition-all duration-300 transform hover:scale-110 shadow-xl ring-2 ring-purple-400/50 hover:ring-purple-300"
-          >
+          <BookingCta className="group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-5 px-10 rounded-xl text-xl transition-all duration-300 transform hover:scale-110 shadow-xl ring-2 ring-purple-400/50 hover:ring-purple-300" size="lg">
             <span className="relative z-10 flex items-center gap-2">
               Varaa aika nyt
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +59,7 @@ export default function Hero() {
               </svg>
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-purple-500 rounded-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm"></div>
-          </Link>
+          </BookingCta>
 
           <Link
             href="/services"

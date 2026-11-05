@@ -1,5 +1,6 @@
 'use client'
 
+import BookingCta from '@/components/BookingCta'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -360,12 +361,9 @@ export default function ServicesPage() {
                           </ul>
 
                           {/* CTA Button */}
-                          <Link
-                            href="/booking"
-                            className="block w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-center font-semibold py-3 rounded-xl transition-all hover:scale-105 shadow-md"
-                          >
+                          <BookingCta className="block w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-center font-semibold py-3 rounded-xl transition-all hover:scale-105 shadow-md" size="sm" service={service.name}>
                             Varaa aika
-                          </Link>
+                          </BookingCta>
                         </div>
                       </div>
                     )
@@ -384,15 +382,12 @@ export default function ServicesPage() {
                 Valmis varaamaan?
               </h2>
               <p className="text-base sm:text-lg text-purple-100 mb-6 sm:mb-8">
-                Varaa aika helposti verkossa. Nopea, kätevä, ja luotettava palvelu!
+                {siteConfig.booking.onlineEnabled ? 'Varaa aika helposti verkossa.' : siteConfig.booking.notice} Nopea, kätevä, ja luotettava palvelu!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/booking"
-                  className="inline-flex items-center justify-center bg-white text-purple-600 font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-purple-50 transition-colors"
-                >
+                <BookingCta className="inline-flex items-center justify-center bg-white text-purple-600 font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-purple-50 transition-colors" size="lg">
                   Varaa aika nyt
-                </Link>
+                </BookingCta>
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center bg-purple-500/20 backdrop-blur-md border border-white/20 hover:bg-purple-500/30 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-colors"
@@ -424,8 +419,8 @@ export default function ServicesPage() {
                 <div className="bg-slate-50 rounded-xl p-6">
                   <h3 className="font-semibold text-slate-900 mb-2">Voinko peruuttaa varauksen?</h3>
                   <p className="text-slate-600 text-sm">
-                    Kyllä! Peruutus on maksuton 24h ennen varattua aikaa.
-                    Voit peruuttaa helposti varaussähköpostista tai soittamalla meille.
+                    Kyllä! Peruutus on maksuton 24h ennen varattua aikaa.{' '}
+                    {siteConfig.booking.onlineEnabled ? 'Voit peruuttaa helposti varaussähköpostista tai soittamalla meille.' : 'Voit peruuttaa helposti soittamalla meille tai WhatsAppilla.'}
                   </p>
                 </div>
 

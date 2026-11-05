@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage -->
   <url>
-    <loc>https://www.kiiltoloisto.fi/</loc>
+    <loc>https://kiiltoloisto.fi/</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -10,28 +10,28 @@
 
   <!-- Main Pages -->
   <url>
-    <loc>https://www.kiiltoloisto.fi/services</loc>
+    <loc>https://kiiltoloisto.fi/services</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://www.kiiltoloisto.fi/booking</loc>
+    <loc>https://kiiltoloisto.fi/booking</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://www.kiiltoloisto.fi/about</loc>
+    <loc>https://kiiltoloisto.fi/about</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://www.kiiltoloisto.fi/contact</loc>
+    <loc>https://kiiltoloisto.fi/contact</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -39,14 +39,14 @@
 
   <!-- Legal Pages -->
   <url>
-    <loc>https://www.kiiltoloisto.fi/privacy</loc>
+    <loc>https://kiiltoloisto.fi/privacy</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://www.kiiltoloisto.fi/terms</loc>
+    <loc>https://kiiltoloisto.fi/terms</loc>
     <lastmod>2024-10-29</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

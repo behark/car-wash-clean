@@ -1,3 +1,4 @@
+import BookingCta from '@/components/BookingCta'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
@@ -30,7 +31,7 @@ const BeforeAfterGallery = dynamic(() => import('../components/BeforeAfterGaller
 // SEO Metadata
 export const metadata: Metadata = {
   title: `${siteConfig.name} - Ammattitasoinen autopesu Helsingissä`,
-  description: `Laadukas autopesu, sisäpuhdistus ja erikoispalvelut Helsingissä. Yli ${siteConfig.features.customers} tyytyväistä asiakasta. Varaa aika helposti verkossa!`,
+  description: `Laadukas autopesu, sisäpuhdistus ja erikoispalvelut Helsingissä. Yli ${siteConfig.features.customers} tyytyväistä asiakasta. ${siteConfig.booking.metaCta}`,
   keywords: ['autopesu Helsinki', 'autopesu', 'autonpesu', 'sisäpuhdistus', 'vahaus', 'kiillotus', siteConfig.name],
   openGraph: {
     title: `${siteConfig.name} - Ammattitasoinen autopesu Helsingissä`,
@@ -196,7 +197,7 @@ export default async function HomePage() {
             <div className="max-w-4xl mx-auto animate-fade-in">
               <div className="inline-flex items-center bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-4 sm:px-6 py-2 mb-6 sm:mb-8">
                 <span className="text-purple-300 text-xs sm:text-sm font-medium">
-                  🚗 Varaa aika nyt ja säästä aikaa
+                  {siteConfig.booking.onlineEnabled ? '🚗 Varaa aika nyt ja säästä aikaa' : '🚗 Laadukasta autopesua Helsingissä'}
                 </span>
               </div>
 
@@ -208,16 +209,13 @@ export default async function HomePage() {
               </h2>
 
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-200 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
-                Helppo online-varaus, laadukas palvelu, ja {siteConfig.features.guarantee}.
+                {siteConfig.booking.onlineEnabled ? 'Helppo online-varaus' : 'Helppo ajanvaraus puhelimitse tai WhatsAppilla'}, laadukas palvelu, ja {siteConfig.features.guarantee}.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-                <Link
-                  href="/booking"
-                  className="w-full sm:w-auto group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
-                >
+                <BookingCta className="w-full sm:w-auto group relative bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl" size="lg" offClassName="w-full sm:w-auto">
                   <span className="relative z-10">Varaa aika nyt</span>
-                </Link>
+                </BookingCta>
 
                 <Link
                   href="/services"

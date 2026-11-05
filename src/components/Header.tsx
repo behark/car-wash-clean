@@ -1,5 +1,6 @@
 'use client'
 
+import BookingCta from '@/components/BookingCta'
 import Link from 'next/link'
 import Image from 'next/image'
 import { siteConfig } from '../lib/siteConfig'
@@ -62,12 +63,9 @@ export default function Header() {
               <span className="font-semibold">{siteConfig.phone.display}</span>
             </a>
 
-            <Link
-              href="/booking"
-              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
+            <BookingCta className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" size="sm" whatsappOnly>
               Varaa aika
-            </Link>
+            </BookingCta>
           </div>
 
           {/* Mobile menu button */}
@@ -104,12 +102,9 @@ export default function Header() {
               >
                 📞 {siteConfig.phone.display}
               </a>
-              <Link
-                href="/booking"
-                className="block mx-4 mt-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl text-center transition-all duration-300"
-              >
+              <BookingCta className="block mx-4 mt-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl text-center transition-all duration-300" size="sm" whatsappOnly offClassName="mx-4 mt-2">
                 Varaa aika nyt
-              </Link>
+              </BookingCta>
             </div>
           </nav>
         </div>

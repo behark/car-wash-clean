@@ -1,3 +1,4 @@
+import { siteConfig } from '@/lib/siteConfig'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
@@ -24,12 +25,12 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.kiiltoloisto.fi'),
+  metadataBase: new URL('https://kiiltoloisto.fi'),
   title: {
     default: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua Helsingissä',
     template: '%s | Kiilto & Loisto'
   },
-  description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta autopesupalvelua Helsingissä. Varaa aika helposti verkossa!',
+  description: `PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta autopesupalvelua Helsingissä. ${siteConfig.booking.metaCta}`,
   keywords: [
     'autopesu Helsinki', 
     'käsinpesu', 
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
     'vahaus',
     'Kiilto & Loisto'
   ],
-  authors: [{ name: 'Kiilto & Loisto', url: 'https://www.kiiltoloisto.fi' }],
+  authors: [{ name: 'Kiilto & Loisto', url: 'https://kiiltoloisto.fi' }],
   creator: 'Kiilto & Loisto',
   publisher: 'Kiilto & Loisto',
   formatDetection: {
@@ -50,11 +51,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Autopesu Kiilto & Loisto - Ammattitaitoista autopesupalvelua',
     description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS. Laadukasta palvelua Helsingissä.',
-    url: 'https://www.kiiltoloisto.fi',
+    url: 'https://kiiltoloisto.fi',
     siteName: 'Kiilto & Loisto',
     images: [
       {
-        url: 'https://www.kiiltoloisto.fi/images/hero-car-wash-professional.jpg',
+        url: 'https://kiiltoloisto.fi/images/hero-car-wash-professional.jpg',
         width: 1200,
         height: 630,
         alt: 'Autopesu Kiilto & Loisto - Ammattitasoinen autopesu',
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Autopesu Kiilto & Loisto',
     description: 'PERUS- & ERIKOISPESUT, RENKAIDEN VAIHTO & SÄILYTYS',
-    images: ['https://www.kiiltoloisto.fi/images/hero-car-wash-professional.jpg'],
+    images: ['https://kiiltoloisto.fi/images/hero-car-wash-professional.jpg'],
   },
   robots: {
     index: true,
@@ -81,7 +82,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://www.kiiltoloisto.fi',
+    canonical: 'https://kiiltoloisto.fi',
   },
 }
 

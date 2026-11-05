@@ -3,6 +3,7 @@ import { validatePhoneNumber, validateEmail, validateName } from '@/lib/validati
 import { sendBookingConfirmationEmail, sendBusinessNotificationEmail } from '@/lib/email';
 import bookingDb from '@/lib/db/bookings';
 import twilio from 'twilio';
+import { siteConfig } from '@/lib/siteConfig';
 
 interface BookingData {
   date: string;
@@ -150,6 +151,13 @@ function validateDateTime(date: string, time: string): { isValid: boolean; error
 }
 
 export async function POST(request: NextRequest) {
+  if (!siteConfig.booking.onlineEnabled) {
+    return NextResponse.json(
+      { error: `${siteConfig.booking.notice} Soita ${siteConfig.phone.display}.` },
+      { status: 503 }
+    );
+  }
+
   try {
     const bookingData: BookingData = await request.json();
 

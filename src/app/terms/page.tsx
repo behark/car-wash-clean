@@ -159,7 +159,7 @@ export default function TermsOfService() {
                 Käsittelemme henkilötietoja tietosuojaselosteen mukaisesti.
                 Tietosuojaseloste on luettavissa verkkosivuillamme osoitteessa{' '}
                 <Link href="/privacy" className="text-gold-600 hover:underline">
-                  www.kiiltoloisto.fi/privacy
+                  kiiltoloisto.fi/privacy
                 </Link>
               </p>
             </section>

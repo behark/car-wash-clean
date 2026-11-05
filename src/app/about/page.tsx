@@ -1,5 +1,6 @@
 'use client'
 
+import BookingCta from '@/components/BookingCta'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { siteConfig } from '@/lib/siteConfig'
@@ -201,12 +202,9 @@ export default function AboutPage() {
               >
                 Ota yhteyttä
               </a>
-              <a
-                href="/booking"
-                className="inline-flex items-center justify-center bg-purple-500/20 backdrop-blur-md border border-white/20 hover:bg-purple-500/30 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-colors"
-              >
+              <BookingCta className="inline-flex items-center justify-center bg-purple-500/20 backdrop-blur-md border border-white/20 hover:bg-purple-500/30 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl transition-colors" size="lg">
                 Varaa aika
-              </a>
+              </BookingCta>
             </div>
           </div>
         </section>

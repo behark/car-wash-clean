@@ -1,5 +1,5 @@
 # Robots.txt for Kiilto & Loisto Autopesu
-# https://www.kiiltoloisto.fi/
+# https://kiiltoloisto.fi/
 
 # Allow all crawlers
 User-agent: *
@@ -11,7 +11,7 @@ Disallow: /api/
 Disallow: /booking/success
 
 # Sitemap location
-Sitemap: https://www.kiiltoloisto.fi/sitemap.xml
+Sitemap: https://kiiltoloisto.fi/sitemap.xml
 
 # Crawl delay (in seconds) - be nice to servers
 Crawl-delay: 1

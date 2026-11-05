@@ -10,9 +10,10 @@ import {
   X,
   Calendar,
   Car,
-  ChevronUp
+  ChevronUp,
+  MessageCircle
 } from 'lucide-react'
-import { siteConfig } from '../lib/siteConfig'
+import { siteConfig, whatsappUrl } from '../lib/siteConfig'
 
 export default function FloatingContactWidget() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -79,16 +80,27 @@ export default function FloatingContactWidget() {
   }, [isExpanded])
 
   const contactMethods = [
-    {
-      id: 'booking',
-      icon: Calendar,
-      label: 'Varaa Aika',
-      action: () => {
-        window.location.href = '/booking'
-      },
-      bgColor: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600'
-    },
+    siteConfig.booking.onlineEnabled
+      ? {
+          id: 'booking',
+          icon: Calendar,
+          label: 'Varaa Aika',
+          action: () => {
+            window.location.href = '/booking'
+          },
+          bgColor: 'bg-purple-500',
+          hoverColor: 'hover:bg-purple-600'
+        }
+      : {
+          id: 'whatsapp',
+          icon: MessageCircle,
+          label: 'Varaa WhatsAppilla',
+          action: () => {
+            window.open(whatsappUrl('Hei, haluaisin varata ajan.'), '_blank')
+          },
+          bgColor: 'bg-green-600',
+          hoverColor: 'hover:bg-green-700'
+        },
     {
       id: 'phone',
       icon: Phone,
@@ -247,7 +259,7 @@ export default function FloatingContactWidget() {
         {/* Desktop Tooltip */}
         {!isExpanded && (
           <div className="hidden sm:block absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-            {isBusinessOpen ? 'Varaa aika - Olemme auki!' : 'Ota yhteyttä'}
+            {isBusinessOpen && siteConfig.booking.onlineEnabled ? 'Varaa aika - Olemme auki!' : 'Ota yhteyttä'}
             <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
           </div>
         )}

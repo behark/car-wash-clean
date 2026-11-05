@@ -1,5 +1,6 @@
 'use client'
 
+import BookingCta from '@/components/BookingCta'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -261,12 +262,9 @@ export default function ContactPage() {
                     >
                       Soita meille
                     </a>
-                    <a
-                      href="/booking"
-                      className="flex-1 bg-white text-purple-600 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all hover:scale-105 text-center font-medium text-sm border-2 border-purple-200 shadow-md"
-                    >
+                    <BookingCta className="flex-1 bg-white text-purple-600 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all hover:scale-105 text-center font-medium text-sm border-2 border-purple-200 shadow-md" size="sm" whatsappOnly offClassName="flex-1">
                       Varaa aika
-                    </a>
+                    </BookingCta>
                   </div>
                 </div>
               </div>
